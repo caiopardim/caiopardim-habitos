@@ -1,0 +1,373 @@
+"use client";
+
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { isSupabaseConfigured } from "@/lib/config";
+import { LocalRepository } from "@/lib/data/local-repository";
+import { SupabaseRepository } from "@/lib/data/supabase-repository";
+import type { Repository, Snapshot } from "@/lib/data/types";
+import { generateDemoData } from "@/lib/demo/generate";
+import { canEditDate, todayInTz } from "@/lib/domain/dates";
+import { computeDay, statusForValue } from "@/lib/domain/day";
+import { computeHistory, indexLogsByDate, type History } from "@/lib/domain/stats";
+import type {
+  DateStr,
+  DaySummary,
+  Habit,
+  HabitLog,
+  LifeArea,
+  LogStatus,
+  Profile,
+  Task,
+} from "@/lib/domain/types";
+import { createClient } from "@/lib/supabase/client";
+import { newId } from "@/lib/utils";
+
+type Status = "loading" | "ready" | "error";
+
+interface AppData {
+  status: Status;
+  repoKind: Repository["kind"] | null;
+  snapshot: Snapshot | null;
+  today: DateStr;
+  history: History | null;
+  /** Resumo de qualquer dia (inclusive futuro, que não entra no histórico). */
+  summaryFor: (date: DateStr) => DaySummary | null;
+  logFor: (habitId: string, date: DateStr) => HabitLog | undefined;
+  canEdit: (date: DateStr) => boolean;
+
+  updateProfile: (patch: Partial<Omit<Profile, "id" | "criadoEm">>) => Promise<void>;
+  completeOnboarding: (input: {
+    nome: string;
+    fuso: string;
+    areas: LifeArea[];
+    habits: Habit[];
+  }) => Promise<void>;
+  setCheck: (habit: Habit, date: DateStr, done: boolean) => void;
+  setQuantity: (habit: Habit, date: DateStr, valor: number) => void;
+  setBadStatus: (habit: Habit, date: DateStr, status: "evitei" | "aconteceu" | null) => void;
+  saveHabit: (habit: Habit) => Promise<void>;
+  setArchived: (habit: Habit, arquivado: boolean) => Promise<void>;
+  deleteHabit: (id: string) => Promise<void>;
+  saveTask: (task: Task) => Promise<void>;
+  toggleTask: (task: Task) => void;
+  deleteTask: (id: string) => Promise<void>;
+  toggleRestDay: (date: DateStr) => void;
+  loadDemo: () => Promise<void>;
+  signOut: () => Promise<void>;
+  reload: () => Promise<void>;
+}
+
+const Ctx = createContext<AppData | null>(null);
+
+async function createRepository(): Promise<Repository | null> {
+  if (!isSupabaseConfigured) return new LocalRepository();
+  const sb = createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) return null;
+  return new SupabaseRepository(sb, user.id);
+}
+
+export function AppDataProvider({ children }: { children: React.ReactNode }) {
+  const [status, setStatus] = useState<Status>("loading");
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const repoRef = useRef<Repository | null>(null);
+  const [now, setNow] = useState(() => new Date());
+
+  const reload = useCallback(async () => {
+    try {
+      const repo = repoRef.current ?? (await createRepository());
+      if (!repo) {
+        window.location.href = "/entrar";
+        return;
+      }
+      repoRef.current = repo;
+      setSnapshot(await repo.load());
+      setStatus("ready");
+    } catch (e) {
+      console.error(e);
+      setStatus("error");
+    }
+  }, []);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+
+  // Vira o dia sem precisar recarregar a página.
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+
+  const fuso = snapshot?.profile.fuso ?? "America/Sao_Paulo";
+  const today = todayInTz(fuso, now);
+
+  const logsIdx = useMemo(() => indexLogsByDate(snapshot?.logs ?? []), [snapshot?.logs]);
+
+  const history = useMemo(() => {
+    if (!snapshot) return null;
+    return computeHistory({
+      habits: snapshot.habits,
+      tasks: snapshot.tasks,
+      logs: snapshot.logs,
+      restDays: snapshot.restDays,
+      limiteSequencia: snapshot.profile.limiteSequencia,
+      start: todayInTz(fuso, new Date(snapshot.profile.criadoEm)),
+      today,
+    });
+  }, [snapshot, fuso, today]);
+
+  const summaryFor = useCallback(
+    (date: DateStr) => {
+      if (!snapshot) return null;
+      return (
+        history?.summaries.get(date) ??
+        computeDay({
+          date,
+          habits: snapshot.habits,
+          tasks: snapshot.tasks,
+          logs: logsIdx.get(date) ?? new Map(),
+          limiteSequencia: snapshot.profile.limiteSequencia,
+        })
+      );
+    },
+    [snapshot, history, logsIdx],
+  );
+
+  const logFor = useCallback((habitId: string, date: DateStr) => logsIdx.get(date)?.get(habitId), [logsIdx]);
+  const canEdit = useCallback((date: DateStr) => canEditDate(date, today), [today]);
+
+  // ── Persistência dos resumos diários e do XP (Supabase) ────────────────
+  const savedRef = useRef<Map<DateStr, string> | null>(null);
+  useEffect(() => {
+    const repo = repoRef.current;
+    if (!history || !repo || repo.kind !== "supabase") return;
+    const key = (s: DaySummary) =>
+      `${s.execucao}|${s.pontuacao}|${s.xpGanho}|${s.diaPerfeito}|${s.contaSequencia}`;
+    if (!savedRef.current) {
+      // Primeira carga: só registra o estado atual como referência.
+      savedRef.current = new Map([...history.summaries].map(([d, s]) => [d, key(s)]));
+      return;
+    }
+    const changed = [...history.summaries.values()].filter((s) => savedRef.current!.get(s.data) !== key(s));
+    if (!changed.length) return;
+    const t = setTimeout(() => {
+      for (const s of changed) savedRef.current!.set(s.data, key(s));
+      Promise.all([
+        repo.saveSummaries(changed),
+        repo.updateProfile({ xpTotal: history.xpTotal, nivel: history.level.nivel }),
+      ]).catch((e) => console.error("Falha ao salvar resumos", e));
+    }, 800);
+    return () => clearTimeout(t);
+  }, [history]);
+
+  // ── Mutação otimista: aplica na hora, sincroniza em segundo plano ──────
+  // As gravações passam por uma fila serial, para que toques rápidos (+/−)
+  // cheguem ao banco na mesma ordem em que aconteceram.
+  const queueRef = useRef<Promise<void>>(Promise.resolve());
+  const mutate = useCallback(
+    (apply: (s: Snapshot) => Snapshot, persist: (repo: Repository) => Promise<void>) => {
+      const repo = repoRef.current;
+      if (!repo) return Promise.resolve();
+      setSnapshot((s) => (s ? apply(s) : s));
+      const job = queueRef.current.then(() =>
+        persist(repo).catch(async (e: unknown) => {
+          console.error(e);
+          toast.error("Não foi possível salvar. Verifique sua conexão.");
+          await reload();
+        }),
+      );
+      queueRef.current = job;
+      return job;
+    },
+    [reload],
+  );
+
+  const upsertLogLocal = (s: Snapshot, log: HabitLog): Snapshot => ({
+    ...s,
+    logs: [...s.logs.filter((l) => !(l.habitId === log.habitId && l.data === log.data)), log],
+  });
+  const removeLogLocal = (s: Snapshot, habitId: string, data: DateStr): Snapshot => ({
+    ...s,
+    logs: s.logs.filter((l) => !(l.habitId === habitId && l.data === data)),
+  });
+
+  const writeLog = useCallback(
+    (habit: Habit, date: DateStr, status: LogStatus | null, valor: number | null) => {
+      if (!canEditDate(date, today)) {
+        toast.error("Só é possível editar registros dos últimos 7 dias.");
+        return;
+      }
+      if (status === null) {
+        void mutate(
+          (s) => removeLogLocal(s, habit.id, date),
+          (r) => r.deleteLog(habit.id, date),
+        );
+        return;
+      }
+      const existing = logsIdx.get(date)?.get(habit.id);
+      const log: HabitLog = {
+        id: existing?.id ?? newId(),
+        habitId: habit.id,
+        data: date,
+        status,
+        valor,
+        concluidoEm: status === "feito" || status === "evitei" ? new Date().toISOString() : null,
+      };
+      void mutate(
+        (s) => upsertLogLocal(s, log),
+        (r) => r.upsertLog(log),
+      );
+    },
+    [logsIdx, mutate, today],
+  );
+
+  const value: AppData = {
+    status,
+    repoKind: repoRef.current?.kind ?? null,
+    snapshot,
+    today,
+    history,
+    summaryFor,
+    logFor,
+    canEdit,
+    reload,
+
+    updateProfile: (patch) =>
+      mutate(
+        (s) => ({ ...s, profile: { ...s.profile, ...patch } }),
+        (r) => r.updateProfile(patch),
+      ),
+
+    completeOnboarding: async ({ nome, fuso: novoFuso, areas, habits }) => {
+      await mutate(
+        (s) => ({
+          ...s,
+          profile: { ...s.profile, nome, fuso: novoFuso, onboardingConcluido: true },
+          areas,
+          habits: [...s.habits, ...habits],
+        }),
+        async (r) => {
+          await r.replaceAreas(areas);
+          await r.upsertHabits(habits);
+          await r.updateProfile({ nome, fuso: novoFuso, onboardingConcluido: true });
+        },
+      );
+    },
+
+    setCheck: (habit, date, done) => writeLog(habit, date, done ? "feito" : null, null),
+
+    setQuantity: (habit, date, valor) => {
+      if (valor <= 0) return writeLog(habit, date, null, null);
+      writeLog(habit, date, statusForValue(valor, habit.metaValor ?? 1), valor);
+    },
+
+    setBadStatus: (habit, date, st) => writeLog(habit, date, st, null),
+
+    saveHabit: (habit) =>
+      mutate(
+        (s) => ({ ...s, habits: upsertById(s.habits, habit) }),
+        (r) => r.upsertHabits([habit]),
+      ),
+
+    setArchived: (habit, arquivado) => {
+      const h: Habit = { ...habit, arquivado, arquivadoEm: arquivado ? today : null };
+      return mutate(
+        (s) => ({ ...s, habits: upsertById(s.habits, h) }),
+        (r) => r.upsertHabits([h]),
+      );
+    },
+
+    deleteHabit: (id) =>
+      mutate(
+        (s) => ({
+          ...s,
+          habits: s.habits.filter((h) => h.id !== id),
+          logs: s.logs.filter((l) => l.habitId !== id),
+        }),
+        (r) => r.deleteHabit(id),
+      ),
+
+    saveTask: (task) =>
+      mutate(
+        (s) => ({ ...s, tasks: upsertById(s.tasks, task) }),
+        (r) => r.upsertTask(task),
+      ),
+
+    toggleTask: (task) => {
+      if (!canEditDate(task.data, today)) {
+        toast.error(
+          task.data > today ? "Essa tarefa é de um dia futuro." : "Só é possível editar os últimos 7 dias.",
+        );
+        return;
+      }
+      const t: Task = {
+        ...task,
+        concluida: !task.concluida,
+        concluidaEm: task.concluida ? null : new Date().toISOString(),
+      };
+      void mutate(
+        (s) => ({ ...s, tasks: upsertById(s.tasks, t) }),
+        (r) => r.upsertTask(t),
+      );
+    },
+
+    deleteTask: (id) =>
+      mutate(
+        (s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }),
+        (r) => r.deleteTask(id),
+      ),
+
+    toggleRestDay: (date) => {
+      const ativo = !snapshot?.restDays.includes(date);
+      void mutate(
+        (s) => ({ ...s, restDays: ativo ? [...s.restDays, date] : s.restDays.filter((d) => d !== date) }),
+        (r) => r.setRestDay(date, ativo),
+      );
+    },
+
+    loadDemo: async () => {
+      const repo = repoRef.current;
+      if (!repo?.importAll || !snapshot) return;
+      const demo = generateDemoData({
+        userId: snapshot.profile.id,
+        today,
+        newId,
+        nome: snapshot.profile.nome || undefined,
+      });
+      await repo.importAll(demo);
+      setSnapshot(demo);
+    },
+
+    signOut: async () => {
+      await repoRef.current?.signOut();
+      window.location.href = isSupabaseConfigured ? "/entrar" : "/onboarding";
+    },
+  };
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
+  const i = list.findIndex((x) => x.id === item.id);
+  if (i < 0) return [...list, item];
+  const copy = [...list];
+  copy[i] = item;
+  return copy;
+}
+
+export function useAppData(): AppData {
+  const ctx = useContext(Ctx);
+  if (!ctx) throw new Error("useAppData precisa estar dentro de <AppDataProvider>");
+  return ctx;
+}
+
+/** Atalho para telas que só renderizam com dados carregados. */
+export function useReadyData() {
+  const d = useAppData();
+  if (!d.snapshot || !d.history) throw new Error("Dados ainda não carregados");
+  return { ...d, snapshot: d.snapshot, history: d.history };
+}
