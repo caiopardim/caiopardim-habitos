@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { BedDouble, Lock } from "lucide-react";
+import Link from "next/link";
+import { EvolutionAvatar } from "@/components/avatar/evolution-avatar";
+import { useAvatar } from "@/components/avatar/use-avatar";
 import { useReadyData } from "@/components/providers/app-data";
 import { AddFab } from "@/components/today/add-fab";
 import { AvoidItem } from "@/components/today/avoid-item";
@@ -23,6 +26,7 @@ const ORDEM_PRIORIDADE = { alta: 0, media: 1, baixa: 2 } as const;
 export default function HojePage() {
   const data = useReadyData();
   const { snapshot, history, today, summaryFor, logFor, canEdit } = data;
+  const avatar = useAvatar();
   const [date, setDate] = useState<DateStr>(today);
   const [filtro, setFiltro] = useState<Filtro>("todas");
   const [editing, setEditing] = useState<Task | null>(null);
@@ -71,12 +75,22 @@ export default function HojePage() {
   return (
     <div className="space-y-6">
       <header className="space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {greeting(hourInTz(snapshot.profile.fuso))}
-            {primeiroNome ? `, ${primeiroNome}` : ""}!
-          </h1>
-          <p className="text-muted-foreground text-sm">{formatLongDate(date)}</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight">
+              {greeting(hourInTz(snapshot.profile.fuso))}
+              {primeiroNome ? `, ${primeiroNome}` : ""}!
+            </h1>
+            <p className="text-muted-foreground text-sm">{formatLongDate(date)}</p>
+          </div>
+          <Link
+            href="/perfil"
+            className="hover:bg-accent flex shrink-0 flex-col items-center rounded-xl px-1"
+            aria-label={`Seu avatar: ${avatar.stage.nome}. Ver perfil`}
+          >
+            <EvolutionAvatar estagio={avatar.estagio} energia={avatar.energia} className="size-16" />
+            <span className="text-muted-foreground -mt-1 text-[10px] font-semibold">{avatar.stage.nome}</span>
+          </Link>
         </div>
         <DateStrip selected={date} today={today} onSelect={setDate} summaryFor={summaryFor} />
       </header>

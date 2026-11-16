@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { EvolutionAvatar } from "@/components/avatar/evolution-avatar";
 import { useAppData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -204,12 +205,20 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <section className="space-y-5 text-center">
-            <p className="pt-6 text-6xl">🚀</p>
+            <EvolutionAvatar
+              estagio={0}
+              energia="energizado"
+              className="mx-auto size-40"
+              title="Seu avatar"
+            />
             <h1 className="text-2xl font-bold">Tudo pronto{nome.trim() ? `, ${nome.trim()}` : ""}!</h1>
             <p className="text-muted-foreground">
               Você vai começar com <strong className="text-foreground">{bons.size}</strong>{" "}
               {bons.size === 1 ? "hábito" : "hábitos"} para fazer e{" "}
               <strong className="text-foreground">{maus.size}</strong> para evitar.
+            </p>
+            <p className="text-muted-foreground mx-auto max-w-sm text-sm">
+              Este é o seu avatar. A cada hábito cumprido ele ganha XP e fica mais forte.
             </p>
             <p className="text-muted-foreground mx-auto max-w-sm text-sm">
               Lembre: um dia ruim é uma queda no gráfico, não um recomeço do zero. O que importa é a

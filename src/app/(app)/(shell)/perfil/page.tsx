@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Settings } from "lucide-react";
+import { AvatarCard } from "@/components/avatar/avatar-card";
 import { ComingSoon } from "@/components/layout/coming-soon";
 import { PageHeader } from "@/components/layout/page-header";
 import { useReadyData } from "@/components/providers/app-data";
@@ -30,6 +31,7 @@ export default function PerfilPage() {
           </Button>
         }
       />
+      <AvatarCard />
       <div className="bg-card rounded-xl border p-4">
         <div className="flex items-end justify-between">
           <div>

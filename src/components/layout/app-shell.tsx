@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
+import { EvolutionWatcher } from "@/components/avatar/evolution-watcher";
 import { useAppData } from "@/components/providers/app-data";
 import { APP_NAME } from "@/lib/config";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh md:flex">
+      <EvolutionWatcher />
       {/* Barra lateral (desktop) */}
       <aside className="bg-card/40 sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r p-4 md:flex">
         <Link href="/hoje" className="mb-6 flex items-center gap-2 px-2 text-lg font-bold">
