@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BedDouble, ChevronDown, Lock } from "lucide-react";
+import { BedDouble, CalendarCheck2, ChevronDown, Lock } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { EvolutionAvatar } from "@/components/avatar/evolution-avatar";
@@ -22,6 +22,7 @@ import { hourInTz } from "@/lib/domain/dates";
 import { habitProgress, isHabitScheduled } from "@/lib/domain/day";
 import { dayStatusMessage } from "@/lib/domain/day-status";
 import { greeting, todayPhrase } from "@/lib/domain/greeting";
+import { isReviewDay } from "@/lib/domain/insights";
 import { computeSeasons } from "@/lib/domain/seasons";
 import { indexLogsByDate } from "@/lib/domain/stats";
 import { canUseRestDay, validRestDays } from "@/lib/domain/streak";
@@ -252,6 +253,17 @@ export default function HojePage() {
         isToday={isToday}
       />
       {isToday && <SeasonCard season={seasons.atual} />}
+      {isToday && isReviewDay(today) && (
+        <Link
+          href="/evolucao#revisao"
+          className="border-primary/50 bg-primary/5 hover:bg-primary/10 flex items-center gap-3 rounded-xl border p-3 text-sm"
+        >
+          <CalendarCheck2 className="text-primary size-5 shrink-0" aria-hidden />
+          <span className="flex-1">
+            <strong>Domingo é dia de revisão.</strong> Veja como foi sua semana e ajuste o que precisar.
+          </span>
+        </Link>
+      )}
 
       {!editable && (
         <p className="bg-muted text-muted-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm">

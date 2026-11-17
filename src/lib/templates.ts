@@ -7,12 +7,13 @@ export interface AreaTemplate {
   emoji: string;
 }
 
+/** Cores validadas como paleta categórica (daltonismo + contraste) nos temas claro e escuro. */
 export const AREAS: AreaTemplate[] = [
-  { chave: "espiritual", nome: "Espiritual", cor: "#a78bfa", emoji: "🙏" },
-  { chave: "saude", nome: "Saúde & Corpo", cor: "#34d399", emoji: "💪" },
-  { chave: "mente", nome: "Mente & Estudo", cor: "#60a5fa", emoji: "📚" },
-  { chave: "trabalho", nome: "Trabalho & Carreira", cor: "#fbbf24", emoji: "💼" },
-  { chave: "pessoal", nome: "Pessoal & Relações", cor: "#f472b6", emoji: "❤️" },
+  { chave: "espiritual", nome: "Espiritual", cor: "#8b5cf6", emoji: "🙏" },
+  { chave: "saude", nome: "Saúde & Corpo", cor: "#059669", emoji: "💪" },
+  { chave: "mente", nome: "Mente & Estudo", cor: "#3b82f6", emoji: "📚" },
+  { chave: "trabalho", nome: "Trabalho & Carreira", cor: "#d97706", emoji: "💼" },
+  { chave: "pessoal", nome: "Pessoal & Relações", cor: "#ec4899", emoji: "❤️" },
 ];
 
 export interface GoodHabitTemplate {

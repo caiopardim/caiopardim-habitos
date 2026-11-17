@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { AreaBars } from "@/components/evolution/area-bars";
 import { Segmented } from "@/components/ui/segmented";
 import { areaStats } from "@/lib/domain/areas";
 import { addDays } from "@/lib/domain/dates";
 import type { DateStr, Habit, HabitLog, LifeArea, Task } from "@/lib/domain/types";
-import { formatPercent } from "@/lib/utils";
 
 type Periodo = "dia" | "7" | "30";
 
@@ -28,12 +28,7 @@ export function AreasCard({
     return areaStats({ habits, tasks, logsByDate, from, to: date });
   }, [periodo, date, habits, tasks, logsByDate]);
 
-  const linhas = [...areas]
-    .sort((a, b) => a.ordem - b.ordem)
-    .filter((a) => a.emFoco || stats.has(a.id))
-    .map((a) => ({ area: a, pct: stats.get(a.id)?.pct ?? null }));
-
-  if (linhas.length === 0) return null;
+  if (!areas.some((a) => a.emFoco || stats.has(a.id))) return null;
 
   return (
     <section aria-labelledby="areas" className="bg-card space-y-4 rounded-xl border p-4">
@@ -53,34 +48,7 @@ export function AreasCard({
           ]}
         />
       </div>
-      <ul className="space-y-3">
-        {linhas.map(({ area, pct }) => (
-          <li key={area.id} className="space-y-1">
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2">
-                <span className="size-2.5 rounded-full" style={{ background: area.cor }} aria-hidden />
-                {area.nome}
-              </span>
-              <span className="text-muted-foreground font-semibold tabular-nums">
-                {pct === null ? "sem itens" : formatPercent(pct)}
-              </span>
-            </div>
-            <div
-              className="bg-muted h-2 overflow-hidden rounded-full"
-              role="progressbar"
-              aria-label={area.nome}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={pct === null ? undefined : Math.round(pct * 100)}
-            >
-              <div
-                className="h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none"
-                style={{ width: `${(pct ?? 0) * 100}%`, background: area.cor }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <AreaBars areas={areas} stats={stats} />
     </section>
   );
 }

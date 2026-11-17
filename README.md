@@ -17,7 +17,7 @@ sua evolução com pontuação, sequência e XP. **Um dia ruim é uma queda no g
 ## Stack
 
 Next.js 15 (App Router) · TypeScript estrito · Tailwind CSS v4 + componentes shadcn/ui · Supabase (Postgres +
-Auth + RLS) · Zod · date-fns · Vitest. Gráficos (Recharts) entram na Fase 2.
+Auth + RLS) · Zod · date-fns · Vitest. Gráficos com Recharts (carregados sob demanda na tela Evolução).
 
 ## Rodando localmente
 
@@ -107,7 +107,7 @@ supabase/migrations/  schema versionado com RLS
 
 - [x] **Fase 0** — Setup
 - [x] **Fase 1** — Auth, onboarding, CRUD de hábitos/tarefas, tela Hoje, regras com testes
-- [ ] **Fase 2** — Evolução (gráficos, filtros) e detalhe do hábito com heatmap
+- [x] **Fase 2** — Evolução: filtros, gráficos, por hábito com heatmap, insights automáticos e revisão semanal
 - [ ] **Fase 3** — Gamificação (temporadas, conquistas, perfil)
 - [ ] **Fase 4** — PWA, offline, lembretes, exportar CSV, excluir conta
 - [ ] **Fase 5** — Monetização

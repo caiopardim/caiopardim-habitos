@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Archive, ArchiveRestore, Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Archive, ArchiveRestore, BarChart3, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { HabitFormDialog } from "@/components/habits/habit-form-dialog";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -78,6 +79,13 @@ export default function HabitosPage() {
           </p>
         </div>
         <div className="flex shrink-0">
+          {h.tipo === "bom" && (
+            <Button variant="ghost" size="icon" asChild>
+              <Link href={`/evolucao?habito=${h.id}`} aria-label={`Ver evolução de ${h.nome}`}>
+                <BarChart3 />
+              </Link>
+            </Button>
+          )}
           {!h.arquivado && (
             <Button
               variant="ghost"
