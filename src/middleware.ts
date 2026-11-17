@@ -1,13 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/entrar", "/cadastro", "/recuperar-senha", "/auth"];
+const PUBLIC_PATHS = ["/entrar", "/cadastro", "/recuperar-senha", "/auth", "/demo"];
+const DEMO_COOKIE = "zoryka_demo";
 
 /** Renova a sessão do Supabase e protege as rotas do app. */
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  // Sem Supabase configurado o app roda em modo demonstração (dados no navegador).
+  // Sem Supabase configurado o app roda em modo local (dados no navegador).
   if (!url || !key) return NextResponse.next();
 
   let response = NextResponse.next({ request });
@@ -29,7 +30,10 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
-  if (!user && !isPublic) {
+  // Modo demonstração: sem conta, com dados fictícios no navegador.
+  const demo = request.cookies.get(DEMO_COOKIE)?.value === "1";
+
+  if (!user && !isPublic && !demo) {
     const to = request.nextUrl.clone();
     to.pathname = "/entrar";
     to.search = "";

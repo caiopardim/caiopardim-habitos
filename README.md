@@ -27,8 +27,16 @@ cp .env.example .env.local   # preencha com as chaves do Supabase (opcional, vej
 npm run dev                  # http://localhost:3000
 ```
 
-**Sem Supabase configurado o app roda em modo demonstração**: sem login, dados salvos no `localStorage` do
-navegador. No onboarding há o botão “Pular e carregar 60 dias de exemplo”.
+### Os três modos
+
+| Modo             | Quando                                | Onde ficam os dados                                          |
+| ---------------- | ------------------------------------- | ------------------------------------------------------------ |
+| **Conta**        | Supabase configurado + usuário logado | Supabase (sincroniza entre dispositivos)                     |
+| **Demonstração** | botão "Ver demonstração" (`/demo`)    | navegador, chave própria, dados fictícios — nunca importados |
+| **Local**        | sem Supabase configurado              | navegador (`zoryka:local:v1`)                                |
+
+Ao criar uma conta num navegador que tem dados do modo local, o app oferece **importar** esse histórico
+(IDs são regenerados — `src/lib/data/import.ts`).
 
 ### Scripts
 
@@ -44,8 +52,9 @@ navegador. No onboarding há o botão “Pular e carregar 60 dias de exemplo”.
 ## Configurando o Supabase
 
 1. Crie um projeto em [supabase.com](https://supabase.com).
-2. No **SQL Editor**, rode `supabase/migrations/20261116000000_schema_inicial.sql`
-   (ou `supabase db push` com a CLI). Isso cria as tabelas, a RLS e o trigger que cria o perfil no cadastro.
+2. No **SQL Editor**, rode em ordem os arquivos de `supabase/migrations/` (ou `supabase db push` com a CLI):
+   - `20261116000000_schema_inicial.sql` — tabelas, RLS e trigger que cria o perfil no cadastro;
+   - `20261117000000_conta_e_onboarding.sql` — objetivo/lembrete no perfil e `delete_my_account()` (exclusão de conta).
 3. Em **Project Settings → API**, copie a URL e a `anon key` para o `.env.local`.
 4. **Authentication → URL Configuration**: adicione `http://localhost:3000/auth/callback` (e a URL da Vercel)
    em _Redirect URLs_.
@@ -54,7 +63,7 @@ navegador. No onboarding há o botão “Pular e carregar 60 dias de exemplo”.
    `SEED_USER_PASSWORD` no `.env.local` e rode `npm run seed`. A service role key só é usada por esse script.
 
 `supabase/tests/rls_smoke.sql` testa a RLS num Postgres local (dois usuários, um tentando ler/gravar dados do
-outro).
+outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depois de `stub_supabase.sql` e das migrations.
 
 ## Arquitetura
 

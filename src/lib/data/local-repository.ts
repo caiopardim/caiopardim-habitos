@@ -2,44 +2,115 @@ import { DEFAULT_STREAK_THRESHOLD, DEFAULT_TIMEZONE } from "../config";
 import type { Profile } from "../domain/types";
 import type { Repository, Snapshot } from "./types";
 
-const KEY = "zoryka:demo:v1";
-/** Chave antiga (antes do nome Zoryka): migrada na primeira leitura. */
-const OLD_KEY = "habitos:demo:v1";
+/** Dados do usuário no modo local (sem Supabase). Podem ser importados para uma conta. */
+export const LOCAL_KEY = "zoryka:local:v1";
+/** Chaves antigas do modo local, lidas uma vez e migradas para LOCAL_KEY. */
+const LEGACY_KEYS = ["zoryka:demo:v1", "habitos:demo:v1"];
+/** Demonstração com dados fictícios: armazenamento separado, nunca importado. */
+export const DEMO_KEY = "zoryka:demonstracao:v1";
 
-function emptySnapshot(): Snapshot {
-  const profile: Profile = {
-    id: "demo-user",
+export function emptyProfile(): Profile {
+  return {
+    id: "local-user",
     nome: "",
     fuso: DEFAULT_TIMEZONE,
     limiteSequencia: DEFAULT_STREAK_THRESHOLD,
     xpTotal: 0,
     nivel: 1,
     onboardingConcluido: false,
+    objetivo: null,
+    lembreteHorario: null,
     criadoEm: new Date().toISOString(),
   };
-  return { profile, areas: [], habits: [], tasks: [], logs: [], restDays: [] };
 }
 
-/** Modo demonstração: tudo fica no localStorage deste navegador. */
+export function emptySnapshot(): Snapshot {
+  return { profile: emptyProfile(), areas: [], habits: [], tasks: [], logs: [], restDays: [] };
+}
+
+/** Completa snapshots salvos por versões antigas (campos novos ficam com o padrão). */
+export function normalizeSnapshot(raw: Partial<Snapshot>): Snapshot {
+  const base = emptySnapshot();
+  return {
+    profile: { ...base.profile, ...(raw.profile ?? {}) },
+    areas: raw.areas ?? [],
+    habits: raw.habits ?? [],
+    tasks: raw.tasks ?? [],
+    logs: raw.logs ?? [],
+    restDays: raw.restDays ?? [],
+  };
+}
+
+function safeGet(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/** Lê os dados do modo local (inclusive de chaves antigas), sem instanciar repositório. */
+export function readLocalSnapshot(): Snapshot | null {
+  const raw = safeGet(LOCAL_KEY) ?? LEGACY_KEYS.map(safeGet).find((v) => v !== null) ?? null;
+  if (!raw) return null;
+  try {
+    return normalizeSnapshot(JSON.parse(raw) as Partial<Snapshot>);
+  } catch {
+    return null;
+  }
+}
+
+export function clearLocalSnapshot() {
+  try {
+    for (const k of [LOCAL_KEY, ...LEGACY_KEYS]) window.localStorage.removeItem(k);
+  } catch {
+    // armazenamento indisponível
+  }
+}
+
+/**
+ * Repositório no localStorage deste navegador.
+ * - kind "local": modo sem Supabase; os dados são do usuário.
+ * - kind "demo": demonstração com dados fictícios (gerados na primeira abertura).
+ */
 export class LocalRepository implements Repository {
-  readonly kind = "local" as const;
   private data: Snapshot = emptySnapshot();
 
+  constructor(
+    readonly kind: "local" | "demo" = "local",
+    private readonly seed?: () => Snapshot,
+  ) {}
+
+  private get key() {
+    return this.kind === "demo" ? DEMO_KEY : LOCAL_KEY;
+  }
+
   private read(): Snapshot {
-    try {
-      const raw = window.localStorage.getItem(KEY) ?? window.localStorage.getItem(OLD_KEY);
-      if (raw) this.data = JSON.parse(raw) as Snapshot;
-    } catch {
-      // armazenamento indisponível (aba anônima etc.): segue só em memória
+    if (this.kind === "local") {
+      this.data = readLocalSnapshot() ?? this.data;
+      return this.data;
+    }
+    const raw = safeGet(this.key);
+    if (raw) {
+      try {
+        this.data = normalizeSnapshot(JSON.parse(raw) as Partial<Snapshot>);
+        return this.data;
+      } catch {
+        // dado corrompido: gera de novo
+      }
+    }
+    if (this.seed) {
+      this.data = this.seed();
+      this.write();
     }
     return this.data;
   }
 
   private write() {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(this.data));
+      window.localStorage.setItem(this.key, JSON.stringify(this.data));
     } catch {
-      // idem
+      // armazenamento indisponível (aba anônima etc.): segue só em memória
     }
   }
 
@@ -118,7 +189,7 @@ export class LocalRepository implements Repository {
   }
 
   saveSummaries() {
-    // No modo local os resumos são sempre recalculados em memória.
+    // No navegador os resumos são sempre recalculados em memória.
     return Promise.resolve();
   }
 
@@ -128,14 +199,19 @@ export class LocalRepository implements Repository {
     return Promise.resolve();
   }
 
-  signOut() {
+  /** Apaga os dados deste modo (local ou demonstração) neste navegador. */
+  deleteAccount() {
     try {
-      window.localStorage.removeItem(KEY);
-      window.localStorage.removeItem(OLD_KEY);
+      if (this.kind === "local") clearLocalSnapshot();
+      else window.localStorage.removeItem(this.key);
     } catch {
       // idem
     }
     this.data = emptySnapshot();
     return Promise.resolve();
+  }
+
+  signOut() {
+    return this.deleteAccount();
   }
 }

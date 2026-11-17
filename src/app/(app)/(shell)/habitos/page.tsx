@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Archive, ArchiveRestore, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { HabitFormDialog } from "@/components/habits/habit-form-dialog";
+import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { useReadyData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,17 @@ export default function HabitosPage() {
   const { snapshot, today, setArchived, deleteHabit } = useReadyData();
   const [editing, setEditing] = useState<{ habit: Habit; isNew: boolean } | null>(null);
   const [tab, setTab] = useState("bons");
+
+  // /habitos?novo=bom|mau abre direto o formulário (atalho dos estados vazios).
+  useEffect(() => {
+    const novo = new URLSearchParams(window.location.search).get("novo");
+    if (novo === "bom" || novo === "mau") {
+      setTab(novo === "mau" ? "maus" : "bons");
+      setEditing({ habit: blankHabit(novo, today), isNew: true });
+      window.history.replaceState(null, "", "/habitos");
+    }
+  }, [today]);
+  const criar = (tipo: "bom" | "mau") => setEditing({ habit: blankHabit(tipo, today), isNew: true });
 
   const ativos = snapshot.habits.filter((h) => !h.arquivado);
   const bons = ativos.filter((h) => h.tipo === "bom");
@@ -110,10 +122,6 @@ export default function HabitosPage() {
     );
   };
 
-  const empty = (msg: string) => (
-    <p className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">{msg}</p>
-  );
-
   return (
     <div>
       <PageHeader
@@ -139,17 +147,41 @@ export default function HabitosPage() {
           {bons.length ? (
             <ul className="space-y-2">{bons.map(row)}</ul>
           ) : (
-            empty("Nenhum hábito ainda. Crie o primeiro!")
+            <EmptyState
+              title="Nenhum hábito ainda"
+              action={
+                <Button onClick={() => criar("bom")}>
+                  <Plus /> Criar hábito
+                </Button>
+              }
+            >
+              Comece por algo pequeno, como beber água ou ler 10 páginas.
+            </EmptyState>
           )}
         </TabsContent>
         <TabsContent value="maus">
-          {maus.length ? <ul className="space-y-2">{maus.map(row)}</ul> : empty("Nenhum hábito para evitar.")}
+          {maus.length ? (
+            <ul className="space-y-2">{maus.map(row)}</ul>
+          ) : (
+            <EmptyState
+              title="Nada para evitar por enquanto"
+              action={
+                <Button variant="secondary" onClick={() => criar("mau")}>
+                  <Plus /> Adicionar hábito a evitar
+                </Button>
+              }
+            >
+              Redes sociais em excesso, açúcar, cigarro… Registrar os dias sem já ajuda a largar.
+            </EmptyState>
+          )}
         </TabsContent>
         <TabsContent value="arquivados">
           {arquivados.length ? (
             <ul className="space-y-2">{arquivados.map(row)}</ul>
           ) : (
-            empty("Hábitos arquivados saem da rotina, mas o histórico continua contando nas suas análises.")
+            <EmptyState title="Nenhum hábito arquivado">
+              Hábitos arquivados saem da rotina, mas o histórico continua contando nas suas análises.
+            </EmptyState>
           )}
         </TabsContent>
       </Tabs>

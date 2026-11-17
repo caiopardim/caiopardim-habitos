@@ -117,6 +117,42 @@ export class SupabaseRepository implements Repository {
     check(await this.sb.from("daily_summaries").upsert(summaries.map((s) => summaryToRow(s, this.userId))));
   }
 
+  /** Grava um snapshot inteiro (já com ids novos — ver remapForImport), em lotes. */
+  async importAll(snap: Snapshot) {
+    const lotes = <T>(rows: T[], size = 500) =>
+      Array.from({ length: Math.ceil(rows.length / size) }, (_, i) => rows.slice(i * size, (i + 1) * size));
+    if (snap.areas.length) await this.replaceAreas(snap.areas);
+    for (const l of lotes(snap.habits.map((h) => habitToRow(h, this.userId)))) {
+      check(await this.sb.from("habits").insert(l));
+    }
+    for (const l of lotes(snap.tasks.map((t) => taskToRow(t, this.userId)))) {
+      check(await this.sb.from("tasks").insert(l));
+    }
+    for (const l of lotes(snap.logs.map((x) => logToRow(x, this.userId)))) {
+      check(await this.sb.from("habit_logs").upsert(l, { onConflict: "habit_id,data" }));
+    }
+    if (snap.restDays.length) {
+      check(
+        await this.sb.from("rest_days").upsert(snap.restDays.map((data) => ({ user_id: this.userId, data }))),
+      );
+    }
+    const p = snap.profile;
+    await this.updateProfile({
+      nome: p.nome,
+      fuso: p.fuso,
+      limiteSequencia: p.limiteSequencia,
+      onboardingConcluido: p.onboardingConcluido,
+      objetivo: p.objetivo,
+      lembreteHorario: p.lembreteHorario,
+    });
+  }
+
+  /** Exclui a conta (função delete_my_account no banco; o cascade apaga os dados). */
+  async deleteAccount() {
+    check(await this.sb.rpc("delete_my_account"));
+    await this.sb.auth.signOut();
+  }
+
   async signOut() {
     await this.sb.auth.signOut();
   }

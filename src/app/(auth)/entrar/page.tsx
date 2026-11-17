@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authErrorMessage } from "@/components/auth/auth-messages";
 import { GoogleButton } from "@/components/auth/google-button";
 import { loginSchema } from "@/components/auth/schemas";
@@ -14,6 +14,14 @@ import { createClient } from "@/lib/supabase/client";
 export default function EntrarPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  // Mensagens vindas de outros fluxos (?conta=excluida, ?erro=link).
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("conta") === "excluida") setAviso("Sua conta e seus dados foram excluídos. Até logo!");
+    if (q.get("erro") === "link") setError("Esse link expirou ou já foi usado. Tente de novo.");
+  }, []);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -34,6 +42,11 @@ export default function EntrarPage() {
 
   return (
     <div className="space-y-5">
+      {aviso && (
+        <p role="status" className="bg-muted rounded-lg p-3 text-center text-sm">
+          {aviso}
+        </p>
+      )}
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <div className="space-y-2">
           <Label htmlFor="email">E-mail</Label>

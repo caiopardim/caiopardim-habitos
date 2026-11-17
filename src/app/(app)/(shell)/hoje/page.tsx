@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { EvolutionAvatar } from "@/components/avatar/evolution-avatar";
 import { useAvatar } from "@/components/avatar/use-avatar";
 import { useReadyData } from "@/components/providers/app-data";
+import { EmptyState } from "@/components/layout/empty-state";
 import { AddFab } from "@/components/today/add-fab";
 import { AreasCard } from "@/components/today/areas-card";
 import { AvoidItem } from "@/components/today/avoid-item";
@@ -291,9 +292,20 @@ export default function HojePage() {
         </div>
 
         {missoes.length === 0 ? (
-          <p className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">
-            Nenhuma missão para este dia. Toque em + para criar uma tarefa ou hábito.
-          </p>
+          <EmptyState
+            title={isToday ? "Seu dia está em branco" : "Nada previsto neste dia"}
+            action={
+              isToday ? (
+                <Button asChild>
+                  <Link href="/habitos?novo=bom">Criar meu primeiro hábito</Link>
+                </Button>
+              ) : undefined
+            }
+          >
+            {isToday
+              ? "Crie um hábito para acompanhar todo dia — ou toque em + para uma tarefa só de hoje."
+              : "Não havia hábitos nem tarefas para este dia."}
+          </EmptyState>
         ) : (
           <>
             {pendentesLista.length > 0 ? (

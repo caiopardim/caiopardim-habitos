@@ -154,6 +154,8 @@ export const BAD_HABIT_TEMPLATES: BadHabitTemplate[] = [
   { chave: "cafeina", nome: "Cafeína à noite", emoji: "☕", area: "saude" },
   { chave: "cigarro", nome: "Cigarro", emoji: "🚬", area: "saude" },
   { chave: "procrastinar", nome: "Procrastinar", emoji: "⏳", area: "trabalho" },
+  { chave: "pornografia", nome: "Pornografia", emoji: "🔞", area: "pessoal" },
+  { chave: "jogos", nome: "Jogos em excesso", emoji: "🎮", area: "mente" },
 ];
 
 export const EMOJI_SUGESTOES = [
@@ -191,3 +193,68 @@ export const PRIORIDADE_LABEL = { alta: "Alta", media: "Média", baixa: "Baixa" 
 
 export const DIAS_SEMANA_CURTO = ["D", "S", "T", "Q", "Q", "S", "S"];
 export const DIAS_SEMANA_NOME = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+/** Limites sugeridos no onboarding: começar com pouco reduz o abandono. */
+export const ONBOARDING_MAX_BONS = 5;
+export const ONBOARDING_MAX_MAUS = 3;
+
+export interface Objetivo {
+  chave: string;
+  titulo: string;
+  emoji: string;
+  areas: string[];
+  bons: string[];
+  maus: string[];
+}
+
+/** Objetivo principal → áreas e hábitos sugeridos no onboarding. */
+export const OBJETIVOS: Objetivo[] = [
+  {
+    chave: "saude",
+    titulo: "Cuidar da saúde e do corpo",
+    emoji: "💪",
+    areas: ["saude"],
+    bons: ["agua", "treinar", "dormir"],
+    maus: ["acucar"],
+  },
+  {
+    chave: "estudo",
+    titulo: "Estudar e aprender com constância",
+    emoji: "📚",
+    areas: ["mente"],
+    bons: ["ler", "estudar"],
+    maus: ["redes"],
+  },
+  {
+    chave: "produtividade",
+    titulo: "Ser mais produtivo no trabalho",
+    emoji: "🎯",
+    areas: ["trabalho", "mente"],
+    bons: ["foco", "ler"],
+    maus: ["procrastinar"],
+  },
+  {
+    chave: "espiritual",
+    titulo: "Cuidar da mente e da espiritualidade",
+    emoji: "🙏",
+    areas: ["espiritual", "pessoal"],
+    bons: ["meditar", "gratidao"],
+    maus: ["redes"],
+  },
+  {
+    chave: "vicio",
+    titulo: "Largar um vício",
+    emoji: "🔓",
+    areas: ["saude", "pessoal"],
+    bons: ["caminhar", "meditar"],
+    maus: ["alcool"],
+  },
+  {
+    chave: "equilibrio",
+    titulo: "Equilíbrio em todas as áreas",
+    emoji: "⚖️",
+    areas: ["saude", "mente", "pessoal"],
+    bons: ["agua", "ler", "meditar"],
+    maus: ["redes"],
+  },
+];

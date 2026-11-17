@@ -185,6 +185,8 @@ export function generateDemoData(opts: {
     xpTotal: 0,
     nivel: 1,
     onboardingConcluido: true,
+    objetivo: "equilibrio",
+    lembreteHorario: "21:00",
     criadoEm: `${start}T12:00:00Z`,
   };
 

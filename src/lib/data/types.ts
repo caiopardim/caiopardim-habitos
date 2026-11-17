@@ -10,12 +10,16 @@ export interface Snapshot {
 }
 
 /**
- * Acesso a dados. Há duas implementações:
- * - Supabase (produção; RLS garante que cada usuário só vê os próprios dados)
- * - Local (modo demonstração, sem Supabase configurado; salva no navegador)
+ * Acesso a dados. Implementações:
+ * - SupabaseRepository: conta real (RLS garante que cada usuário só vê os próprios dados)
+ * - LocalRepository "local": sem Supabase configurado; dados do usuário neste navegador
+ * - LocalRepository "demo": demonstração com dados fictícios, separada de tudo
  */
+export type RepoKind = "supabase" | "local" | "demo";
+
 export interface Repository {
-  readonly kind: "supabase" | "local";
+  /** supabase = conta real · local = sem Supabase, dados no navegador · demo = demonstração fictícia */
+  readonly kind: RepoKind;
   load(): Promise<Snapshot>;
   updateProfile(patch: Partial<Omit<Profile, "id" | "criadoEm">>): Promise<void>;
   replaceAreas(areas: LifeArea[]): Promise<void>;
@@ -27,7 +31,9 @@ export interface Repository {
   deleteLog(habitId: string, data: DateStr): Promise<void>;
   setRestDay(data: DateStr, ativo: boolean): Promise<void>;
   saveSummaries(summaries: DaySummary[]): Promise<void>;
-  /** Substitui tudo pelos dados informados (usado para carregar o exemplo). */
-  importAll?(snapshot: Snapshot): Promise<void>;
+  /** Grava um snapshot inteiro (importação de dados do navegador para a conta). */
+  importAll(snapshot: Snapshot): Promise<void>;
+  /** Exclui a conta e todos os dados (no navegador: apaga os dados locais). */
+  deleteAccount(): Promise<void>;
   signOut(): Promise<void>;
 }

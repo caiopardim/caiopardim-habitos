@@ -16,6 +16,10 @@ export interface Profile {
   xpTotal: number;
   nivel: number;
   onboardingConcluido: boolean;
+  /** Objetivo principal escolhido no onboarding (chave de OBJETIVOS). */
+  objetivo: string | null;
+  /** Horário "HH:mm" para fechar o dia (lembretes, Bloco 5.3). */
+  lembreteHorario: string | null;
   criadoEm: string;
 }
 

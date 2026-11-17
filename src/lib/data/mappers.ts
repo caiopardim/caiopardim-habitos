@@ -18,6 +18,8 @@ export const profileRow = z
     xp_total: num,
     nivel: num,
     onboarding_concluido: z.boolean(),
+    objetivo: z.string().nullable().optional(),
+    lembrete_horario: z.string().nullable().optional(),
     criado_em: z.string(),
   })
   .transform((r): Profile => ({
@@ -28,6 +30,8 @@ export const profileRow = z
     xpTotal: r.xp_total,
     nivel: r.nivel,
     onboardingConcluido: r.onboarding_concluido,
+    objetivo: r.objetivo ?? null,
+    lembreteHorario: r.lembrete_horario ? r.lembrete_horario.slice(0, 5) : null,
     criadoEm: r.criado_em,
   }));
 
@@ -121,6 +125,8 @@ export function profileToRow(p: Partial<Omit<Profile, "id" | "criadoEm">>) {
   if (p.xpTotal !== undefined) row.xp_total = p.xpTotal;
   if (p.nivel !== undefined) row.nivel = p.nivel;
   if (p.onboardingConcluido !== undefined) row.onboarding_concluido = p.onboardingConcluido;
+  if (p.objetivo !== undefined) row.objetivo = p.objetivo;
+  if (p.lembreteHorario !== undefined) row.lembrete_horario = p.lembreteHorario;
   return row;
 }
 

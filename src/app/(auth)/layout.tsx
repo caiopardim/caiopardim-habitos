@@ -12,16 +12,27 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <p className="text-muted-foreground text-sm">{APP_TAGLINE}</p>
       </div>
       {isSupabaseConfigured ? (
-        children
+        <>
+          {children}
+          <p className="text-muted-foreground text-center text-sm">
+            Quer conhecer antes?{" "}
+            <Link href="/demo" className="text-foreground font-semibold underline-offset-4 hover:underline">
+              Ver demonstração
+            </Link>
+          </p>
+        </>
       ) : (
         <div className="bg-card space-y-4 rounded-xl border p-5 text-sm">
-          <p className="font-semibold">Modo demonstração</p>
+          <p className="font-semibold">Modo local</p>
           <p className="text-muted-foreground">
-            O Supabase ainda não está configurado (veja o README). Você pode usar o app com os dados salvos só
-            neste navegador.
+            As contas ainda não estão configuradas (veja o README). Você pode usar o app com os dados salvos
+            só neste navegador.
           </p>
           <Button asChild className="w-full">
-            <Link href="/hoje">Entrar no modo demonstração</Link>
+            <Link href="/hoje">Começar</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/demo">Ver demonstração</Link>
           </Button>
         </div>
       )}

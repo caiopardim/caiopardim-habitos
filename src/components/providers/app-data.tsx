@@ -2,11 +2,14 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { isSupabaseConfigured } from "@/lib/config";
-import { LocalRepository } from "@/lib/data/local-repository";
+import { DEFAULT_TIMEZONE, isSupabaseConfigured } from "@/lib/config";
+import { hasMeaningfulData, remapForImport } from "@/lib/data/import";
+import { persistResilient } from "@/lib/data/sync";
+import { clearLocalSnapshot, LocalRepository, readLocalSnapshot } from "@/lib/data/local-repository";
 import { SupabaseRepository } from "@/lib/data/supabase-repository";
-import type { Repository, Snapshot } from "@/lib/data/types";
+import type { RepoKind, Repository, Snapshot } from "@/lib/data/types";
 import { generateDemoData } from "@/lib/demo/generate";
+import { exitDemo, isDemoActive } from "@/lib/demo/mode";
 import { canEditDate, todayInTz } from "@/lib/domain/dates";
 import { computeDay, statusForValue } from "@/lib/domain/day";
 import { computeHistory, indexLogsByDate, type History } from "@/lib/domain/stats";
@@ -27,7 +30,7 @@ type Status = "loading" | "ready" | "error";
 
 interface AppData {
   status: Status;
-  repoKind: Repository["kind"] | null;
+  repoKind: RepoKind | null;
   snapshot: Snapshot | null;
   today: DateStr;
   history: History | null;
@@ -37,12 +40,21 @@ interface AppData {
   canEdit: (date: DateStr) => boolean;
 
   updateProfile: (patch: Partial<Omit<Profile, "id" | "criadoEm">>) => Promise<void>;
-  completeOnboarding: (input: {
+  /** Onboarding, etapa 1: grava perfil, áreas e hábitos (o usuário ainda faz o 1º check-in). */
+  setupOnboarding: (input: {
     nome: string;
     fuso: string;
+    objetivo: string | null;
+    lembreteHorario: string | null;
     areas: LifeArea[];
     habits: Habit[];
   }) => Promise<void>;
+  /** Onboarding, etapa final: libera o app. */
+  finishOnboarding: () => Promise<void>;
+  /** Dados salvos neste navegador (modo local) que podem ir para a conta. */
+  localImport: Snapshot | null;
+  importLocalData: () => Promise<void>;
+  dismissLocalImport: () => void;
   setCheck: (habit: Habit, date: DateStr, done: boolean) => void;
   setQuantity: (habit: Habit, date: DateStr, valor: number) => void;
   setBadStatus: (habit: Habit, date: DateStr, status: "evitei" | "aconteceu" | null) => void;
@@ -53,21 +65,45 @@ interface AppData {
   toggleTask: (task: Task) => void;
   deleteTask: (id: string) => Promise<void>;
   toggleRestDay: (date: DateStr) => void;
-  loadDemo: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
   reload: () => Promise<void>;
 }
 
 const Ctx = createContext<AppData | null>(null);
 
+const IMPORT_DISMISSED_KEY = "zoryka:importacao-recusada";
+
+/**
+ * Escolhe de onde vêm os dados: conta real (logado) → demonstração (cookie) → modo local
+ * (sem Supabase). Sem nenhum dos três, retorna null e o usuário vai para o login.
+ */
 async function createRepository(): Promise<Repository | null> {
-  if (!isSupabaseConfigured) return new LocalRepository();
-  const sb = createClient();
-  const {
-    data: { user },
-  } = await sb.auth.getUser();
-  if (!user) return null;
-  return new SupabaseRepository(sb, user.id);
+  if (isSupabaseConfigured) {
+    const sb = createClient();
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+    if (user) {
+      if (isDemoActive()) exitDemo(); // entrou na conta: sai da demonstração
+      return new SupabaseRepository(sb, user.id);
+    }
+  }
+  if (isDemoActive()) {
+    return new LocalRepository("demo", () =>
+      generateDemoData({ userId: "demo-user", today: todayInTz(DEFAULT_TIMEZONE), newId }),
+    );
+  }
+  if (!isSupabaseConfigured) return new LocalRepository("local");
+  return null;
+}
+
+function importDismissed(): boolean {
+  try {
+    return window.localStorage.getItem(IMPORT_DISMISSED_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
@@ -75,6 +111,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const repoRef = useRef<Repository | null>(null);
   const [now, setNow] = useState(() => new Date());
+  const [localImport, setLocalImport] = useState<Snapshot | null>(null);
 
   const reload = useCallback(async () => {
     try {
@@ -84,7 +121,15 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       repoRef.current = repo;
-      setSnapshot(await repo.load());
+      const snap = await repo.load();
+      // Conta nova + dados no navegador (modo local) → oferece importar.
+      if (repo.kind === "supabase" && snap.habits.length === 0 && !importDismissed()) {
+        const local = readLocalSnapshot();
+        setLocalImport(hasMeaningfulData(local) ? local : null);
+      } else {
+        setLocalImport(null);
+      }
+      setSnapshot(snap);
       setStatus("ready");
     } catch (e) {
       console.error(e);
@@ -174,7 +219,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       if (!repo) return Promise.resolve();
       setSnapshot((s) => (s ? apply(s) : s));
       const job = queueRef.current.then(() =>
-        persist(repo).catch(async (e: unknown) => {
+        persistResilient(() => persist(repo)).catch(async (e: unknown) => {
           console.error(e);
           toast.error("Não foi possível salvar. Verifique sua conexão.");
           await reload();
@@ -242,20 +287,48 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         (r) => r.updateProfile(patch),
       ),
 
-    completeOnboarding: async ({ nome, fuso: novoFuso, areas, habits }) => {
+    setupOnboarding: async ({ nome, fuso: novoFuso, objetivo, lembreteHorario, areas, habits }) => {
+      const patch = { nome, fuso: novoFuso, objetivo, lembreteHorario };
       await mutate(
         (s) => ({
           ...s,
-          profile: { ...s.profile, nome, fuso: novoFuso, onboardingConcluido: true },
+          profile: { ...s.profile, ...patch },
           areas,
           habits: [...s.habits, ...habits],
         }),
         async (r) => {
           await r.replaceAreas(areas);
           await r.upsertHabits(habits);
-          await r.updateProfile({ nome, fuso: novoFuso, onboardingConcluido: true });
+          await r.updateProfile(patch);
         },
       );
+    },
+
+    finishOnboarding: () =>
+      mutate(
+        (s) => ({ ...s, profile: { ...s.profile, onboardingConcluido: true } }),
+        (r) => r.updateProfile({ onboardingConcluido: true }),
+      ),
+
+    localImport,
+
+    importLocalData: async () => {
+      const repo = repoRef.current;
+      if (!repo || !snapshot || !localImport) return;
+      const pronto = remapForImport(localImport, snapshot.profile.id, newId);
+      await repo.importAll(pronto);
+      clearLocalSnapshot();
+      setLocalImport(null);
+      await reload();
+    },
+
+    dismissLocalImport: () => {
+      try {
+        window.localStorage.setItem(IMPORT_DISMISSED_KEY, "1");
+      } catch {
+        // sem armazenamento: só esconde nesta sessão
+      }
+      setLocalImport(null);
     },
 
     setCheck: (habit, date, done) => writeLog(habit, date, done ? "feito" : null, null),
@@ -329,21 +402,18 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       );
     },
 
-    loadDemo: async () => {
-      const repo = repoRef.current;
-      if (!repo?.importAll || !snapshot) return;
-      const demo = generateDemoData({
-        userId: snapshot.profile.id,
-        today,
-        newId,
-        nome: snapshot.profile.nome || undefined,
-      });
-      await repo.importAll(demo);
-      setSnapshot(demo);
+    deleteAccount: async () => {
+      const kind = repoRef.current?.kind;
+      await repoRef.current?.deleteAccount();
+      if (kind === "demo") exitDemo();
+      window.location.href = isSupabaseConfigured ? "/entrar?conta=excluida" : "/onboarding";
     },
 
+    /** Conta: sai da sessão · Demonstração: sai e apaga os dados fictícios · Local: apaga os dados. */
     signOut: async () => {
+      const kind = repoRef.current?.kind;
       await repoRef.current?.signOut();
+      if (kind === "demo") exitDemo();
       window.location.href = isSupabaseConfigured ? "/entrar" : "/onboarding";
     },
   };

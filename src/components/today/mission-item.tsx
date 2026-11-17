@@ -187,9 +187,9 @@ function QuantityControl({
             onChange={(e) => setTexto(e.target.value)}
             onBlur={commit}
             onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
-            className="w-16 bg-transparent text-right font-bold tabular-nums outline-none"
+            className="w-14 min-w-0 bg-transparent text-right font-bold tabular-nums outline-none"
           />
-          <span className="text-muted-foreground">
+          <span className="text-muted-foreground whitespace-nowrap">
             / {formatNumber(meta)} {habit.unidade}
           </span>
         </label>

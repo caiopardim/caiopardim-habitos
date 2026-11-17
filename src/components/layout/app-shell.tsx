@@ -6,7 +6,9 @@ import { Settings } from "lucide-react";
 import { EvolutionWatcher } from "@/components/avatar/evolution-watcher";
 import { useAppData } from "@/components/providers/app-data";
 import { ZorykaLogo } from "@/components/brand/logo";
-import { APP_NAME } from "@/lib/config";
+import { APP_NAME, isSupabaseConfigured } from "@/lib/config";
+import type { RepoKind } from "@/lib/data/types";
+import { OfflineBanner } from "./offline-banner";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "./nav-items";
 
@@ -45,15 +47,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ),
           )}
         </nav>
-        {repoKind === "local" && <DemoBadge />}
+        <ModeBadge kind={repoKind} />
       </aside>
 
       <div className="min-w-0 flex-1">
-        {repoKind === "local" && (
-          <div className="md:hidden">
-            <DemoBadge />
-          </div>
-        )}
+        <OfflineBanner ativo={repoKind === "supabase"} />
+        <div className="md:hidden">
+          <ModeBadge kind={repoKind} />
+        </div>
         <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-28 md:px-8 md:pt-8 md:pb-12">{children}</main>
       </div>
 
@@ -84,10 +85,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function DemoBadge() {
-  return (
-    <p className="bg-primary/10 text-muted-foreground px-4 py-1.5 text-center text-xs md:rounded-lg md:text-left">
-      Modo demonstração · dados salvos neste navegador
-    </p>
-  );
+function ModeBadge({ kind }: { kind: RepoKind | null }) {
+  if (kind === "demo") {
+    return (
+      <p className="bg-primary/10 px-4 py-2 text-center text-xs md:rounded-lg md:text-left">
+        <span className="text-muted-foreground">Demonstração com dados fictícios · </span>
+        <Link
+          href={isSupabaseConfigured ? "/cadastro" : "/configuracoes"}
+          className="font-semibold underline underline-offset-2"
+        >
+          {isSupabaseConfigured ? "Criar minha conta" : "Sair da demonstração"}
+        </Link>
+      </p>
+    );
+  }
+  if (kind === "local") {
+    return (
+      <p className="bg-primary/10 text-muted-foreground px-4 py-1.5 text-center text-xs md:rounded-lg md:text-left">
+        Modo local · seus dados ficam só neste navegador
+      </p>
+    );
+  }
+  return null;
 }
