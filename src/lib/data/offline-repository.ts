@@ -1,6 +1,6 @@
 import type { DateStr, DaySummary, Habit, HabitLog, LifeArea, Profile, Task } from "../domain/types";
 import { isNetworkError } from "./sync";
-import type { Repository, Snapshot } from "./types";
+import type { Repository, Snapshot, UnlockedAchievement } from "./types";
 
 /** Armazenamento chave-valor (localStorage no navegador; um Map nos testes). */
 export interface KV {
@@ -44,7 +44,8 @@ type QueuedOp =
   | { m: "upsertLog"; a: [HabitLog] }
   | { m: "deleteLog"; a: [string, DateStr] }
   | { m: "setRestDay"; a: [DateStr, boolean] }
-  | { m: "saveSummaries"; a: [DaySummary[]] };
+  | { m: "saveSummaries"; a: [DaySummary[]] }
+  | { m: "addAchievements"; a: [UnlockedAchievement[]] };
 
 export interface SyncStatus {
   pendentes: number;
@@ -218,6 +219,9 @@ export class OfflineFirstRepository implements Repository {
   }
   saveSummaries(summaries: DaySummary[]) {
     return this.enqueue({ m: "saveSummaries", a: [summaries] });
+  }
+  addAchievements(list: UnlockedAchievement[]) {
+    return this.enqueue({ m: "addAchievements", a: [list] });
   }
 
   // Estas precisam de conexão e acontecem na hora.

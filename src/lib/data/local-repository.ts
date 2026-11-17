@@ -26,7 +26,15 @@ export function emptyProfile(): Profile {
 }
 
 export function emptySnapshot(): Snapshot {
-  return { profile: emptyProfile(), areas: [], habits: [], tasks: [], logs: [], restDays: [] };
+  return {
+    profile: emptyProfile(),
+    areas: [],
+    habits: [],
+    tasks: [],
+    logs: [],
+    restDays: [],
+    achievements: [],
+  };
 }
 
 /** Completa snapshots salvos por versões antigas (campos novos ficam com o padrão). */
@@ -43,6 +51,7 @@ export function normalizeSnapshot(raw: Partial<Snapshot>): Snapshot {
     tasks: raw.tasks ?? [],
     logs: raw.logs ?? [],
     restDays: raw.restDays ?? [],
+    achievements: raw.achievements ?? [],
   };
 }
 
@@ -190,6 +199,13 @@ export class LocalRepository implements Repository {
     return this.mutate((s) => {
       s.restDays = s.restDays.filter((d) => d !== data);
       if (ativo) s.restDays.push(data);
+    });
+  }
+
+  addAchievements(list: Snapshot["achievements"]) {
+    return this.mutate((s) => {
+      const ja = new Set(s.achievements.map((a) => a.codigo));
+      s.achievements.push(...list.filter((a) => !ja.has(a.codigo)));
     });
   }
 

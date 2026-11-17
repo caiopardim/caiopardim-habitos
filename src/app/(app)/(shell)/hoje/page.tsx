@@ -9,6 +9,7 @@ import { useAvatar } from "@/components/avatar/use-avatar";
 import { useReadyData } from "@/components/providers/app-data";
 import { EmptyState } from "@/components/layout/empty-state";
 import { EngagementCard } from "@/components/pwa/engagement-card";
+import { RestDayInfo } from "@/components/gamification/rest-day-info";
 import { AddFab } from "@/components/today/add-fab";
 import { AreasCard } from "@/components/today/areas-card";
 import { AvoidItem } from "@/components/today/avoid-item";
@@ -281,6 +282,9 @@ export default function HojePage() {
             {descansoAtivo
               ? "Dia de descanso: sua sequência está protegida."
               : "Precisa de uma pausa? Use o dia de descanso da semana sem quebrar a sequência."}
+            <span className="mt-0.5 block">
+              <RestDayInfo />
+            </span>
           </p>
           <Button
             size="sm"

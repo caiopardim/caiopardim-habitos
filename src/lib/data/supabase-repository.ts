@@ -13,7 +13,7 @@ import {
   taskRow,
   taskToRow,
 } from "./mappers";
-import type { Repository, Snapshot } from "./types";
+import type { Repository, Snapshot, UnlockedAchievement } from "./types";
 
 class DataError extends Error {}
 
@@ -46,13 +46,14 @@ export class SupabaseRepository implements Repository {
   ) {}
 
   async load(): Promise<Snapshot> {
-    const [p, areas, habits, tasks, logs, rest] = await Promise.all([
+    const [p, areas, habits, tasks, logs, rest, conquistas] = await Promise.all([
       this.sb.from("profiles").select("*").eq("id", this.userId).single(),
       this.sb.from("life_areas").select("*").order("ordem"),
       this.sb.from("habits").select("*").order("criado_em"),
       fetchAll((a, b) => this.sb.from("tasks").select("*").order("data").range(a, b)),
       fetchAll((a, b) => this.sb.from("habit_logs").select("*").order("data").range(a, b)),
       this.sb.from("rest_days").select("data"),
+      this.sb.from("achievements").select("codigo, conquistado_em"),
     ]);
     return {
       profile: profileRow.parse(check(p)),
@@ -61,6 +62,10 @@ export class SupabaseRepository implements Repository {
       tasks: parseRows(taskRow, tasks),
       logs: parseRows(logRow, logs),
       restDays: (check(rest) ?? []).map((r: { data: string }) => r.data),
+      achievements: (check(conquistas) ?? []).map((r: { codigo: string; conquistado_em: string }) => ({
+        codigo: r.codigo,
+        conquistadoEm: r.conquistado_em,
+      })),
     };
   }
 
@@ -117,6 +122,16 @@ export class SupabaseRepository implements Repository {
     check(await this.sb.from("daily_summaries").upsert(summaries.map((s) => summaryToRow(s, this.userId))));
   }
 
+  async addAchievements(list: UnlockedAchievement[]) {
+    if (!list.length) return;
+    check(
+      await this.sb.from("achievements").upsert(
+        list.map((x) => ({ user_id: this.userId, codigo: x.codigo, conquistado_em: x.conquistadoEm })),
+        { onConflict: "user_id,codigo", ignoreDuplicates: true },
+      ),
+    );
+  }
+
   /** Grava um snapshot inteiro (já com ids novos — ver remapForImport), em lotes. */
   async importAll(snap: Snapshot) {
     const lotes = <T>(rows: T[], size = 500) =>
@@ -136,6 +151,7 @@ export class SupabaseRepository implements Repository {
         await this.sb.from("rest_days").upsert(snap.restDays.map((data) => ({ user_id: this.userId, data }))),
       );
     }
+    await this.addAchievements(snap.achievements);
     const p = snap.profile;
     await this.updateProfile({
       nome: p.nome,

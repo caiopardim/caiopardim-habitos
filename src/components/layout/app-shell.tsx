@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
-import { EvolutionWatcher } from "@/components/avatar/evolution-watcher";
+import { CelebrationCenter } from "@/components/gamification/celebration-center";
 import { useAppData } from "@/components/providers/app-data";
 import { ZorykaLogo } from "@/components/brand/logo";
 import { APP_NAME, isSupabaseConfigured } from "@/lib/config";
@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh md:flex">
-      <EvolutionWatcher />
+      <CelebrationCenter />
       {/* Barra lateral (desktop) */}
       <aside className="bg-card/40 sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r p-4 md:flex">
         <Link

@@ -202,5 +202,5 @@ export function generateDemoData(opts: {
   };
 
   // Um dia de descanso usado há duas semanas, para a proteção aparecer no histórico.
-  return { profile, areas, habits, tasks, logs, restDays: [addDays(today, -15)] };
+  return { profile, areas, habits, tasks, logs, restDays: [addDays(today, -15)], achievements: [] };
 }

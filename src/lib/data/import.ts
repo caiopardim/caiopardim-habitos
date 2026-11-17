@@ -31,5 +31,6 @@ export function remapForImport(s: Snapshot, userId: string, newId: () => string)
       .filter((l) => habitIds.has(l.habitId))
       .map((l) => ({ ...l, id: newId(), habitId: habitIds.get(l.habitId)! })),
     restDays: [...new Set(s.restDays)],
+    achievements: s.achievements ?? [],
   };
 }

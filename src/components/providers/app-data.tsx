@@ -69,6 +69,8 @@ interface AppData {
   deleteTask: (id: string) => Promise<void>;
   toggleRestDay: (date: DateStr) => void;
   deleteAccount: () => Promise<void>;
+  /** Registra medalhas conquistadas (ignora as que já existem). */
+  addAchievements: (codigos: string[]) => void;
   signOut: () => Promise<void>;
   reload: () => Promise<void>;
 }
@@ -435,6 +437,18 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       void mutate(
         (s) => ({ ...s, restDays: ativo ? [...s.restDays, date] : s.restDays.filter((d) => d !== date) }),
         (r) => r.setRestDay(date, ativo),
+      );
+    },
+
+    addAchievements: (codigos) => {
+      const ja = new Set(snapshot?.achievements.map((a) => a.codigo));
+      const novas = codigos
+        .filter((c) => !ja.has(c))
+        .map((codigo) => ({ codigo, conquistadoEm: new Date().toISOString() }));
+      if (!novas.length) return;
+      void mutate(
+        (s) => ({ ...s, achievements: [...s.achievements, ...novas] }),
+        (r) => r.addAchievements(novas),
       );
     },
 

@@ -131,7 +131,7 @@ supabase/migrations/  schema versionado com RLS
 - [x] **Fase 0** — Setup
 - [x] **Fase 1** — Auth, onboarding, CRUD de hábitos/tarefas, tela Hoje, regras com testes
 - [x] **Fase 2** — Evolução: filtros, gráficos, por hábito com heatmap, insights automáticos e revisão semanal
-- [ ] **Fase 3** — Gamificação (temporadas, conquistas, perfil)
+- [x] **Fase 3** — Gamificação: temporadas, 25 medalhas, celebrações em tela cheia com compartilhamento, evolução do avatar animada
 - [x] **Fase 4** — PWA, offline com fila de sincronização, lembretes por push, exportar CSV, excluir conta
 - [ ] **Fase 5** — Monetização
 

@@ -7,6 +7,13 @@ export interface Snapshot {
   tasks: Task[];
   logs: HabitLog[];
   restDays: DateStr[];
+  /** Medalhas conquistadas (permanentes). */
+  achievements: UnlockedAchievement[];
+}
+
+export interface UnlockedAchievement {
+  codigo: string;
+  conquistadoEm: string;
 }
 
 /**
@@ -31,6 +38,7 @@ export interface Repository {
   deleteLog(habitId: string, data: DateStr): Promise<void>;
   setRestDay(data: DateStr, ativo: boolean): Promise<void>;
   saveSummaries(summaries: DaySummary[]): Promise<void>;
+  addAchievements(list: UnlockedAchievement[]): Promise<void>;
   /** Grava um snapshot inteiro (importação de dados do navegador para a conta). */
   importAll(snapshot: Snapshot): Promise<void>;
   /** Exclui a conta e todos os dados (no navegador: apaga os dados locais). */
