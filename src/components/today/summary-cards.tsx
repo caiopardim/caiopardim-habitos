@@ -34,41 +34,41 @@ export function TodayHero({ summary }: { summary: DaySummary | null }) {
           maus.previstos ? `, hábitos evitados ${maus.evitados} de ${maus.previstos}` : ""
         }${perfeito ? ", dia perfeito" : ""}`}
       />
-      <dl className="min-w-0 flex-1 space-y-2.5">
+      <div className="min-w-0 flex-1 space-y-2.5">
         <div>
-          <dt className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+          <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
             <span className="bg-brand-pink size-2 rounded-full" aria-hidden />
             Execução do dia
-          </dt>
-          <dd className="text-3xl leading-tight font-bold tabular-nums">
+          </p>
+          <p className="text-3xl leading-tight font-bold tabular-nums">
             {temItens ? formatPercent(exec) : "—"}
-          </dd>
+          </p>
           {temItens && (
-            <dd className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground text-xs">
               {formatConcluidos(summary!.concluidos)} de {summary!.totalItens} itens
-            </dd>
+            </p>
           )}
         </div>
         <div className="flex gap-5">
           <div>
-            <dt className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+            <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
               <span className="bg-brand-orange size-2 rounded-full" aria-hidden />
               Evitados
-            </dt>
-            <dd className="text-lg font-bold tabular-nums">
+            </p>
+            <p className="text-lg font-bold tabular-nums">
               {maus.previstos ? `${maus.evitados}/${maus.previstos}` : "—"}
-            </dd>
+            </p>
           </div>
           <div>
-            <dt className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+            <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
               <span className="bg-brand-yellow size-2 rounded-full" aria-hidden />
               Pontuação
-            </dt>
-            <dd className="text-lg font-bold tabular-nums">{temItens ? summary!.pontuacao : "—"}</dd>
+            </p>
+            <p className="text-lg font-bold tabular-nums">{temItens ? summary!.pontuacao : "—"}</p>
           </div>
         </div>
         {perfeito && <p className="text-xp text-sm font-semibold">✨ Dia perfeito!</p>}
-      </dl>
+      </div>
     </section>
   );
 }

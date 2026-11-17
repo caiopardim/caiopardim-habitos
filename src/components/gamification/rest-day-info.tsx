@@ -17,7 +17,7 @@ export function RestDayInfo({ children }: { children?: React.ReactNode }) {
     <Dialog>
       <DialogTrigger asChild>
         {children ?? (
-          <Button variant="link" size="sm" className="h-auto px-0 py-0 text-xs">
+          <Button variant="link" size="sm" className="-my-2 h-11 px-0 text-xs">
             <Info className="size-3.5" /> Como funciona?
           </Button>
         )}

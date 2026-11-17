@@ -32,8 +32,8 @@
   --input: #dccfc1;
   --ring: #f57a2a;
   /* texto de XP: laranja escurecido para ter contraste sobre o creme */
-  --xp: #b4511a;
-  --success: #2f8a5f;
+  --xp: #96420f;
+  --success: #1d6b46;
   --danger: #c8344f;
 }
 
@@ -106,6 +106,14 @@
   }
   html {
     -webkit-tap-highlight-color: transparent;
+  }
+  /* Foco sempre visível na navegação por teclado */
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   h1,
   h2 {

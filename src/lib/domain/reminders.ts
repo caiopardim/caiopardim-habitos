@@ -1,5 +1,6 @@
 import { habitProgress, isHabitScheduled } from "./day";
 import { itemsToStreak } from "./greeting";
+import { symbolText } from "./habit-symbol";
 import type { DateStr, DaySummary, Habit, HabitLog, NotificationPrefs } from "./types";
 import { formatNumberPtBr } from "./format";
 
@@ -129,7 +130,7 @@ export function planReminders(input: PlanInput): Reminder[] {
       out.push({
         tipo: "habito",
         ref: h.id,
-        title: `${h.emoji} Hora de ${h.nome}`,
+        title: `${symbolText(h.emoji)} Hora de ${h.nome}`.trim(),
         body: meta,
         url: "/hoje",
       });

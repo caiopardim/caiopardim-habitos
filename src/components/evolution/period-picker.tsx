@@ -35,7 +35,7 @@ export function PeriodPicker({
             aria-checked={value === p}
             onClick={() => onChange(p)}
             className={cn(
-              "focus-visible:ring-ring/50 h-10 shrink-0 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-none",
+              "focus-visible:ring-ring/50 h-11 shrink-0 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-none",
               value === p
                 ? "border-foreground bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground",

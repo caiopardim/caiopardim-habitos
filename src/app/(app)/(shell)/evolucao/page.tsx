@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { HabitIcon } from "@/components/habits/habit-icon";
 import { AreaBars } from "@/components/evolution/area-bars";
 import { InsightsCard } from "@/components/evolution/insights-card";
 import { PeriodPicker } from "@/components/evolution/period-picker";
@@ -33,6 +34,7 @@ import {
   type PeriodPreset,
 } from "@/lib/domain/evolution";
 import { buildInsights, isReviewDay, reviewRef, weeklyReview } from "@/lib/domain/insights";
+import { symbolText } from "@/lib/domain/habit-symbol";
 import { indexLogsByDate } from "@/lib/domain/stats";
 import type { DateStr, HabitLog } from "@/lib/domain/types";
 import { formatShortDate } from "@/lib/format-date";
@@ -318,7 +320,9 @@ export default function EvolucaoPage() {
             {serie.porSemana ? "Média por semana. " : ""}Hoje entra no gráfico quando o dia terminar.
           </p>
           <details className="text-sm">
-            <summary className="text-muted-foreground cursor-pointer text-xs">Ver como tabela</summary>
+            <summary className="text-muted-foreground flex min-h-11 cursor-pointer items-center text-xs">
+              Ver como tabela
+            </summary>
             <table className="mt-2 w-full text-left text-xs">
               <thead>
                 <tr className="text-muted-foreground">
@@ -349,12 +353,12 @@ export default function EvolucaoPage() {
             aria-label="Escolher hábito"
             value={habito ? habito.id : "geral"}
             onChange={(e) => setHabitoId(e.target.value)}
-            className="h-10 max-w-52"
+            className="max-w-52"
           >
             <option value="geral">Visão geral</option>
             {bons.map((h) => (
               <option key={h.id} value={h.id}>
-                {h.emoji} {h.nome}
+                {symbolText(h.emoji)} {h.nome}
                 {h.arquivado ? " (arquivado)" : ""}
               </option>
             ))}
@@ -369,12 +373,12 @@ export default function EvolucaoPage() {
                   <button
                     type="button"
                     onClick={() => setHabitoId(h.id)}
-                    className="hover:bg-accent -mx-2 w-[calc(100%+1rem)] space-y-1 rounded-lg px-2 py-1 text-left"
+                    className="hover:bg-accent -mx-2 w-[calc(100%+1rem)] space-y-1 rounded-lg px-2 py-2 text-left"
                     aria-label={`${h.nome}: ${formatPercent(stats.taxa ?? 0)} dos dias previstos. Ver detalhes`}
                   >
                     <span className="flex items-center justify-between text-sm">
                       <span>
-                        <span aria-hidden>{h.emoji}</span> {h.nome}
+                        <HabitIcon simbolo={h.emoji} /> {h.nome}
                       </span>
                       <span className="text-muted-foreground font-semibold tabular-nums">
                         {stats.concluidos}/{stats.previstos} · {formatPercent(stats.taxa ?? 0)}
@@ -467,7 +471,7 @@ export default function EvolucaoPage() {
               <li key={h.id} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
                   <span>
-                    <span aria-hidden>{h.emoji}</span> {h.nome}
+                    <HabitIcon simbolo={h.emoji} /> {h.nome}
                   </span>
                   <span className="text-muted-foreground font-semibold tabular-nums">
                     {taxa === null ? "sem registros" : formatPercent(taxa)}

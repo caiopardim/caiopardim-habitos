@@ -7,6 +7,7 @@ import { XP_POR_DIFICULDADE, habitProgress } from "@/lib/domain/day";
 import { clampValue, suggestedStep } from "@/lib/domain/quantity";
 import type { Habit, HabitLog, LifeArea, Task } from "@/lib/domain/types";
 import { DIFICULDADE_LABEL, PRIORIDADE_LABEL } from "@/lib/templates";
+import { HabitIcon } from "@/components/habits/habit-icon";
 import { cn, formatNumber } from "@/lib/utils";
 import { useXpBurst } from "./xp-burst";
 
@@ -109,7 +110,7 @@ export function HabitMission({
         <div className="min-w-0 flex-1">
           <p className={cn("truncate font-semibold", done && "text-muted-foreground")}>
             <span className="mr-1.5" aria-hidden>
-              {habit.emoji}
+              <HabitIcon simbolo={habit.emoji} />
             </span>
             {habit.nome}
           </p>
@@ -178,7 +179,7 @@ function QuantityControl({
         >
           <Minus className="size-4" />
         </button>
-        <label className="bg-background/50 flex h-11 flex-1 items-center justify-center gap-1 rounded-lg border px-2 text-sm">
+        <label className="bg-background/50 focus-within:border-ring focus-within:ring-ring/50 flex h-11 flex-1 items-center justify-center gap-1 rounded-lg border px-2 text-sm focus-within:ring-[3px]">
           <span className="sr-only">Quantidade de {habit.nome}</span>
           <input
             inputMode="decimal"

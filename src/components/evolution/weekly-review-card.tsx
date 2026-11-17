@@ -67,7 +67,7 @@ export function WeeklyReviewCard({ review, destaque }: { review: WeeklyReview; d
           </p>
         </div>
         {destaque && !feita && (
-          <span className="bg-primary/15 text-primary rounded-full px-2.5 py-1 text-xs font-semibold">
+          <span className="bg-primary/15 text-xp rounded-full px-2.5 py-1 text-xs font-semibold">
             Domingo de revisão
           </span>
         )}

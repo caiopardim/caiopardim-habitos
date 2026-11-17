@@ -215,10 +215,10 @@ export default function ConfiguracoesPage() {
             Você está vendo dados fictícios. Nada do que você marcar aqui vai para uma conta.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button asChild className="flex-1">
+            <Button asChild className="sm:flex-1">
               <Link href="/cadastro">Criar minha conta</Link>
             </Button>
-            <Button variant="outline" className="flex-1" onClick={() => void signOut()}>
+            <Button variant="outline" className="sm:flex-1" onClick={() => void signOut()}>
               Sair da demonstração
             </Button>
           </div>

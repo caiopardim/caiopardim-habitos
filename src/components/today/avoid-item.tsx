@@ -4,6 +4,7 @@ import { ShieldCheck, TriangleAlert } from "lucide-react";
 import { badHabitStats } from "@/lib/domain/bad-habits";
 import { XP_MAU_HABITO_EVITADO } from "@/lib/domain/day";
 import type { DateStr, Habit, HabitLog, LifeArea } from "@/lib/domain/types";
+import { HabitIcon } from "@/components/habits/habit-icon";
 import { cn } from "@/lib/utils";
 import { useXpBurst } from "./xp-burst";
 
@@ -34,7 +35,7 @@ export function AvoidItem({
       {node}
       <div className="flex items-start gap-3">
         <span className="bg-muted grid size-11 shrink-0 place-items-center rounded-full text-xl" aria-hidden>
-          {habit.emoji}
+          <HabitIcon simbolo={habit.emoji} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{habit.nome}</p>

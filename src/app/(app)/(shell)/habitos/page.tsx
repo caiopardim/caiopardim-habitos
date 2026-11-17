@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Archive, ArchiveRestore, BarChart3, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { HabitIcon } from "@/components/habits/habit-icon";
 import { HabitFormDialog } from "@/components/habits/habit-form-dialog";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -64,7 +65,7 @@ export default function HabitosPage() {
     return (
       <li key={h.id} className="bg-card flex items-center gap-3 rounded-xl border p-3">
         <span className="bg-muted grid size-11 shrink-0 place-items-center rounded-full text-xl" aria-hidden>
-          {h.emoji}
+          <HabitIcon simbolo={h.emoji} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{h.nome}</p>

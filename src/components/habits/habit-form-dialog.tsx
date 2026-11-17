@@ -16,6 +16,8 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
+import { HABIT_ICONS, HabitIcon } from "@/components/habits/habit-icon";
+import { isLucide, LUCIDE_PREFIX } from "@/lib/domain/habit-symbol";
 import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { XP_POR_DIFICULDADE } from "@/lib/domain/day";
@@ -51,6 +53,7 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
   const { snapshot, saveHabit, today, repoKind } = useAppData();
   const areas = snapshot?.areas ?? [];
   const [v, setV] = useState(habit);
+  const [aba, setAba] = useState<"emoji" | "icone">(isLucide(habit.emoji) ? "icone" : "emoji");
   const [metaTexto, setMetaTexto] = useState(
     habit.metaValor ? String(habit.metaValor).replace(".", ",") : "",
   );
@@ -103,16 +106,16 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
       </DialogHeader>
 
       <div className="flex gap-3">
-        <Field id="emoji" label="Ícone" error={errors.emoji}>
-          <Input
-            id="emoji"
-            className="w-16 text-center text-xl"
-            value={v.emoji}
-            onChange={(e) => set("emoji", e.target.value)}
-            maxLength={16}
-            aria-label="Emoji do hábito"
-          />
-        </Field>
+        <div className="space-y-2">
+          <Label>Ícone</Label>
+          <span
+            className="bg-muted grid size-11 place-items-center rounded-lg text-xl"
+            aria-label="Ícone escolhido"
+            role="img"
+          >
+            <HabitIcon simbolo={v.emoji} />
+          </span>
+        </div>
         <div className="flex-1">
           <Field id="nome" label="Nome" error={errors.nome}>
             <Input
@@ -127,21 +130,68 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
         </div>
       </div>
 
-      <div className="-mt-2 flex flex-wrap gap-1" aria-label="Sugestões de emoji">
-        {EMOJI_SUGESTOES.map((em) => (
-          <button
-            key={em}
-            type="button"
-            onClick={() => set("emoji", em)}
-            className={cn(
-              "hover:bg-accent grid size-10 place-items-center rounded-lg text-lg",
-              v.emoji === em && "bg-accent ring-primary ring-2",
-            )}
-            aria-label={`Usar ${em}`}
-          >
-            {em}
-          </button>
-        ))}
+      <div className="-mt-1 space-y-2">
+        <Segmented
+          label="Tipo de ícone"
+          value={aba}
+          onChange={setAba}
+          options={[
+            { value: "emoji", label: "Emoji" },
+            { value: "icone", label: "Ícone" },
+          ]}
+        />
+        {aba === "emoji" ? (
+          <>
+            <div className="flex flex-wrap gap-1" aria-label="Sugestões de emoji">
+              {EMOJI_SUGESTOES.map((em) => (
+                <button
+                  key={em}
+                  type="button"
+                  onClick={() => set("emoji", em)}
+                  aria-pressed={v.emoji === em}
+                  className={cn(
+                    "hover:bg-accent grid size-11 place-items-center rounded-lg text-lg",
+                    v.emoji === em && "bg-accent ring-primary ring-2",
+                  )}
+                  aria-label={`Usar ${em}`}
+                >
+                  {em}
+                </button>
+              ))}
+            </div>
+            <Field id="emoji" label="Outro emoji" error={errors.emoji}>
+              <Input
+                id="emoji"
+                className="w-24 text-center text-xl"
+                value={isLucide(v.emoji) ? "" : v.emoji}
+                onChange={(e) => set("emoji", e.target.value)}
+                maxLength={16}
+              />
+            </Field>
+          </>
+        ) : (
+          <div className="flex flex-wrap gap-1" aria-label="Ícones">
+            {Object.entries(HABIT_ICONS).map(([nome, { Icon, nome: rotulo }]) => {
+              const valor = `${LUCIDE_PREFIX}${nome}`;
+              return (
+                <button
+                  key={nome}
+                  type="button"
+                  onClick={() => set("emoji", valor)}
+                  aria-pressed={v.emoji === valor}
+                  aria-label={rotulo}
+                  title={rotulo}
+                  className={cn(
+                    "hover:bg-accent grid size-11 place-items-center rounded-lg",
+                    v.emoji === valor && "bg-accent ring-primary ring-2",
+                  )}
+                >
+                  <Icon className="size-5" aria-hidden />
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <Field id="area" label="Área da vida">

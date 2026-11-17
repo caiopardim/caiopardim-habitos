@@ -7,7 +7,7 @@ export const habitFormSchema = z
   .object({
     tipo: z.enum(["bom", "mau"]),
     nome: z.string().trim().min(1, "Dê um nome ao hábito.").max(60, "Use até 60 caracteres."),
-    emoji: z.string().trim().min(1, "Escolha um emoji.").max(16),
+    emoji: z.string().trim().min(1, "Escolha um ícone.").max(32),
     areaId: z.string().nullable(),
     metaTipo: z.enum(["check", "quantidade"]),
     metaValor: z.number().positive("A meta precisa ser maior que zero.").max(1_000_000).nullable(),

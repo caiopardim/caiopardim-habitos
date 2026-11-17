@@ -53,21 +53,33 @@ export function DateStrip({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <p className="text-muted-foreground text-sm font-medium">
-          {formatShortDate(days[0])} – {formatShortDate(days[6])}
-        </p>
-        {selected !== today && (
-          <Button variant="link" size="sm" className="h-8 px-0" onClick={() => onSelect(today)}>
-            Voltar para hoje
-          </Button>
-        )}
-      </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between gap-2">
         <Button variant="ghost" size="icon" aria-label="Semana anterior" onClick={() => shift(-7)}>
           <ChevronLeft />
         </Button>
-        <ol className="grid flex-1 grid-cols-7 gap-1">
+        <div className="flex flex-1 flex-col items-center">
+          <p className="text-muted-foreground text-sm font-medium">
+            {formatShortDate(days[0])} – {formatShortDate(days[6])}
+          </p>
+          {selected !== today && (
+            <Button variant="link" size="sm" className="-my-2 px-0" onClick={() => onSelect(today)}>
+              Voltar para hoje
+            </Button>
+          )}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Próxima semana"
+          onClick={() => shift(7)}
+          disabled={atToday}
+          className="disabled:opacity-20"
+        >
+          <ChevronRight />
+        </Button>
+      </div>
+      <div>
+        <ol className="grid grid-cols-7 gap-1">
           {days.map((d) => {
             const s = summaryFor(d);
             const level = dayLevel(s, restDays.has(d));
@@ -88,10 +100,7 @@ export function DateStrip({
                   )}
                 >
                   <span
-                    className={cn(
-                      "capitalize",
-                      isToday ? "text-primary font-semibold" : "text-muted-foreground",
-                    )}
+                    className={cn("capitalize", isToday ? "text-xp font-semibold" : "text-muted-foreground")}
                   >
                     {isToday ? "Hoje" : formatWeekdayShort(d)}
                   </span>
@@ -104,16 +113,6 @@ export function DateStrip({
             );
           })}
         </ol>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Próxima semana"
-          onClick={() => shift(7)}
-          disabled={atToday}
-          className="disabled:opacity-20"
-        >
-          <ChevronRight />
-        </Button>
       </div>
       <p className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px]">
         <Legend cor="var(--brand-pink)">abaixo da meta</Legend>

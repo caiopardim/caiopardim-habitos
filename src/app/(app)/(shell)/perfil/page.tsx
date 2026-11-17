@@ -137,7 +137,7 @@ export default function PerfilPage() {
           </Button>
         </div>
         {conquistadas.length ? (
-          <ul className="flex gap-2 overflow-x-auto pb-1" aria-label="Medalhas conquistadas">
+          <ul className="flex flex-wrap gap-2" aria-label="Medalhas conquistadas">
             {conquistadas.slice(0, 6).map((m) => (
               <li key={m.def.codigo}>
                 <Medal conteudo={m.def.emoji} size={56} label={m.def.nome} />
@@ -161,6 +161,7 @@ export default function PerfilPage() {
                 value={proxima.progresso * 100}
                 indicatorClassName="bg-brand-gradient"
                 className="h-1.5"
+                aria-label={`Progresso até ${proxima.def.nome}`}
               />
             </div>
           </div>
