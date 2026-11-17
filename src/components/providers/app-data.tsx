@@ -24,7 +24,6 @@ import type {
   Profile,
   Task,
 } from "@/lib/domain/types";
-import { createClient } from "@/lib/supabase/client";
 import { newId } from "@/lib/utils";
 
 type Status = "loading" | "ready" | "error";
@@ -85,6 +84,8 @@ const IMPORT_DISMISSED_KEY = "zoryka:importacao-recusada";
  */
 async function createRepository(): Promise<Repository | null> {
   if (isSupabaseConfigured) {
+    // Carregado sob demanda: o cliente do Supabase não pesa nos modos local e demonstração.
+    const { createClient } = await import("@/lib/supabase/client");
     const sb = createClient();
     // Sessão salva no aparelho: funciona sem internet (a RLS no banco continua garantindo o acesso).
     const {

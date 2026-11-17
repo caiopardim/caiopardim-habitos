@@ -1,13 +1,23 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { ListPlus, Plus, ShieldOff, Sparkles } from "lucide-react";
-import { HabitFormDialog } from "@/components/habits/habit-form-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { blankHabit } from "@/lib/habit-factory";
 import type { DateStr, Habit, Task } from "@/lib/domain/types";
 import { newId } from "@/lib/utils";
-import { TaskFormDialog } from "./task-form-dialog";
+
+// Abre só quando a pessoa toca: não pesa no carregamento da tela.
+const TaskFormDialog = dynamic(() => import("./task-form-dialog").then((m) => m.TaskFormDialog), {
+  ssr: false,
+});
+
+// Abre só quando a pessoa toca: não pesa no carregamento da tela.
+const HabitFormDialog = dynamic(
+  () => import("@/components/habits/habit-form-dialog").then((m) => m.HabitFormDialog),
+  { ssr: false },
+);
 
 export function AddFab({ date, today }: { date: DateStr; today: DateStr }) {
   const [menu, setMenu] = useState(false);

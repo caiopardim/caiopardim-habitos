@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { ThemeColorSync } from "@/components/providers/theme-color-sync";
@@ -7,6 +8,20 @@ import { IOS_SPLASH } from "@/lib/splash";
 import { THEME_COLOR_BOOTSTRAP, THEME_COLORS } from "@/lib/theme-color";
 import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/config";
 import "./globals.css";
+
+// Fontes servidas pelo próprio app: só o subconjunto latino (cobre o português), pré-carregadas, com swap.
+const inter = localFont({
+  src: "./fonts/inter-latin.woff2",
+  variable: "--font-inter",
+  weight: "100 900",
+  display: "swap",
+});
+const sora = localFont({
+  src: "./fonts/sora-latin.woff2",
+  variable: "--font-sora",
+  weight: "100 800",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: { default: `${APP_NAME} · ${APP_TAGLINE}`, template: `%s · ${APP_NAME}` },
@@ -31,7 +46,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning className={`${inter.variable} ${sora.variable}`}>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_COLOR_BOOTSTRAP }} />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>

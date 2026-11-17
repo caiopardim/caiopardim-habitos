@@ -1,11 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAvatar } from "@/components/avatar/use-avatar";
 import { useReadyData } from "@/components/providers/app-data";
 import { crossedMilestone, newlyUnlocked } from "@/lib/domain/achievements";
-import { CelebrationOverlay, type Celebration } from "./celebration-overlay";
+import type { Celebration } from "./celebration-overlay";
 import { useGamification } from "./use-gamification";
+
+// A tela de celebração (e o gerador de imagem) só baixa quando há algo para comemorar.
+const CelebrationOverlay = dynamic(() => import("./celebration-overlay").then((m) => m.CelebrationOverlay), {
+  ssr: false,
+});
 
 /**
  * Detecta o que acabou de acontecer e comemora em tela cheia, uma coisa de cada vez:

@@ -1,11 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Archive, ArchiveRestore, BarChart3, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { HabitIcon } from "@/components/habits/habit-icon";
-import { HabitFormDialog } from "@/components/habits/habit-form-dialog";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { useReadyData } from "@/components/providers/app-data";
@@ -18,6 +18,12 @@ import { blankHabit } from "@/lib/habit-factory";
 import { formatShortDate } from "@/lib/format-date";
 import { DIAS_SEMANA_NOME, DIFICULDADE_LABEL } from "@/lib/templates";
 import { formatNumber } from "@/lib/utils";
+
+// Abre só quando a pessoa toca: não pesa no carregamento da tela.
+const HabitFormDialog = dynamic(
+  () => import("@/components/habits/habit-form-dialog").then((m) => m.HabitFormDialog),
+  { ssr: false },
+);
 
 function frequencia(h: Habit): string {
   if (h.diasSemana.length === 0 || h.diasSemana.length === 7) return "Todos os dias";

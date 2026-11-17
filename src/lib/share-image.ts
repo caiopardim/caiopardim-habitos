@@ -80,9 +80,13 @@ function svgToImage(svg: string): Promise<HTMLImageElement> {
 }
 
 export async function renderShareCard(card: ShareCard): Promise<Blob> {
+  // As fontes do app (next/font) têm nome gerado; usamos a família resolvida das variáveis CSS.
+  const raiz = getComputedStyle(document.documentElement);
+  const SORA = raiz.getPropertyValue("--font-sora").trim() || "sans-serif";
+  const INTER = raiz.getPropertyValue("--font-inter").trim() || "sans-serif";
   await Promise.all([
-    document.fonts.load('700 64px "Sora Variable"'),
-    document.fonts.load('400 40px "Inter Variable"'),
+    document.fonts.load(`700 64px ${SORA}`),
+    document.fonts.load(`400 40px ${INTER}`),
   ]).catch(() => undefined);
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -122,20 +126,20 @@ export async function renderShareCard(card: ShareCard): Promise<Blob> {
   } else {
     const numero = /^\d+$/.test(card.destaque);
     ctx.fillStyle = C.creme;
-    ctx.font = numero ? '700 190px "Sora Variable", sans-serif' : "190px sans-serif";
+    ctx.font = numero ? `700 190px ${SORA}` : "190px sans-serif";
     ctx.fillText(card.destaque, cx, cy + (numero ? 8 : 14));
   }
 
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = C.creme;
-  ctx.font = '700 72px "Sora Variable", sans-serif';
+  ctx.font = `700 72px ${SORA}`;
   let y = 880;
   for (const l of wrap(ctx, card.titulo, 900)) {
     ctx.fillText(l, cx, y);
     y += 86;
   }
   ctx.fillStyle = C.muted;
-  ctx.font = '400 40px "Inter Variable", sans-serif';
+  ctx.font = `400 40px ${INTER}`;
   y += 10;
   for (const l of wrap(ctx, card.subtitulo, 860)) {
     ctx.fillText(l, cx, y);
@@ -146,13 +150,13 @@ export async function renderShareCard(card: ShareCard): Promise<Blob> {
   drawMark(ctx, cx - 200, 1170, 1.1);
   ctx.textAlign = "left";
   ctx.fillStyle = C.creme;
-  ctx.font = '600 52px "Sora Variable", sans-serif';
+  ctx.font = `600 52px ${SORA}`;
   ctx.letterSpacing = "8px";
   ctx.fillText("ZORYKA", cx - 50, 1240);
   ctx.letterSpacing = "0px";
   ctx.textAlign = "center";
   ctx.fillStyle = C.muted;
-  ctx.font = '400 32px "Inter Variable", sans-serif';
+  ctx.font = `400 32px ${INTER}`;
   ctx.fillText("sua evolução, um dia de cada vez", cx, 1310);
 
   return new Promise((resolve, reject) =>

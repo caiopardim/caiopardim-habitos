@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BedDouble, CalendarCheck2, ChevronDown, Lock } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +18,6 @@ import { DateStrip } from "@/components/today/date-strip";
 import { HabitMission, TaskMission } from "@/components/today/mission-item";
 import { SeasonCard } from "@/components/today/season-card";
 import { StatCards, TodayHero } from "@/components/today/summary-cards";
-import { TaskFormDialog } from "@/components/today/task-form-dialog";
 import { Button } from "@/components/ui/button";
 import { badHabitStats } from "@/lib/domain/bad-habits";
 import { hourInTz } from "@/lib/domain/dates";
@@ -32,6 +32,12 @@ import type { DateStr, Habit, HabitLog, Task } from "@/lib/domain/types";
 import { formatLongDate } from "@/lib/format-date";
 import { haptic } from "@/lib/haptic";
 import { cn } from "@/lib/utils";
+
+// Abre só quando a pessoa toca: não pesa no carregamento da tela.
+const TaskFormDialog = dynamic(
+  () => import("@/components/today/task-form-dialog").then((m) => m.TaskFormDialog),
+  { ssr: false },
+);
 
 const ORDEM_PRIORIDADE = { alta: 0, media: 1, baixa: 2 } as const;
 /** Tempo que um item recém-concluído fica na lista de pendentes (para a animação de +XP terminar). */
