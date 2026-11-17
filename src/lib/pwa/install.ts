@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { track } from "@/lib/analytics";
 
 /** Evento do Chrome/Android para instalar o PWA (não existe no tipo padrão do DOM). */
 interface BeforeInstallPromptEvent extends Event {
@@ -22,6 +23,7 @@ export function captureInstallPrompt() {
     notify();
   });
   window.addEventListener("appinstalled", () => {
+    track("app_instalado");
     installed = true;
     deferred = null;
     notify();

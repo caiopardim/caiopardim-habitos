@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics";
 import { useAppData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,6 +91,7 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
       lembrete: v.lembrete && !!parsed.data.horario,
       cor: bom ? (area?.cor ?? v.cor) : v.cor,
     });
+    if (isNew) track("habito_criado", { tipo: v.tipo, meta: v.metaTipo });
     toast.success(isNew ? "Hábito criado!" : "Hábito atualizado.");
     onDone();
   }

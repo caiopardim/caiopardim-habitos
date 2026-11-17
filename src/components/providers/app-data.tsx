@@ -2,7 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { identify, track, trackDiaAtivo } from "@/lib/analytics";
 import { DEFAULT_TIMEZONE, isSupabaseConfigured } from "@/lib/config";
+import { setMonitoringUser } from "@/lib/monitoring";
 import { hasMeaningfulData, remapForImport } from "@/lib/data/import";
 import { persistResilient } from "@/lib/data/sync";
 import { clearLocalSnapshot, LocalRepository, readLocalSnapshot } from "@/lib/data/local-repository";
@@ -137,6 +139,10 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         setLocalImport(hasMeaningfulData(local) ? local : null);
       } else {
         setLocalImport(null);
+      }
+      if (repo.kind === "supabase") {
+        identify(snap.profile.id);
+        setMonitoringUser(snap.profile.id);
       }
       setSnapshot(snap);
       setStatus("ready");
@@ -284,6 +290,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         toast.error("Só é possível editar registros dos últimos 7 dias.");
         return;
       }
+      if (status === "feito" || status === "parcial" || status === "evitei") {
+        if (snapshot && snapshot.logs.length === 0 && !snapshot.tasks.some((t) => t.concluida))
+          track("primeiro_checkin");
+        trackDiaAtivo(today);
+      }
       if (status === null) {
         void mutate(
           (s) => removeLogLocal(s, habit.id, date),
@@ -305,7 +316,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         (r) => r.upsertLog(log),
       );
     },
-    [logsIdx, mutate, today],
+    [logsIdx, mutate, today, snapshot],
   );
 
   const value: AppData = {
@@ -343,11 +354,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       );
     },
 
-    finishOnboarding: () =>
-      mutate(
+    finishOnboarding: () => {
+      track("onboarding_concluido", { objetivo: snapshot?.profile.objetivo ?? "nenhum" });
+      return mutate(
         (s) => ({ ...s, profile: { ...s.profile, onboardingConcluido: true } }),
         (r) => r.updateProfile({ onboardingConcluido: true }),
-      ),
+      );
+    },
 
     localImport,
 
@@ -416,6 +429,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         );
         return;
       }
+      if (!task.concluida) trackDiaAtivo(today);
       const t: Task = {
         ...task,
         concluida: !task.concluida,
@@ -455,6 +469,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
     deleteAccount: async () => {
       const kind = repoRef.current?.kind;
+      if (kind === "supabase") track("conta_excluida");
       await repoRef.current?.deleteAccount();
       if (kind === "demo") exitDemo();
       window.location.href = isSupabaseConfigured ? "/entrar?conta=excluida" : "/onboarding";

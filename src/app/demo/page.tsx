@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { track } from "@/lib/analytics";
 import { enterDemo } from "@/lib/demo/mode";
 
 /** "Ver demonstração": entra no app com dados fictícios, separados de qualquer conta. */
 export default function DemoPage() {
   useEffect(() => {
     enterDemo();
+    track("demo_iniciada");
     window.location.replace("/hoje");
   }, []);
   return (

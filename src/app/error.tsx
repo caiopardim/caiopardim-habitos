@@ -2,11 +2,12 @@
 
 import { useEffect } from "react";
 import { ErrorState } from "@/components/layout/error-state";
+import { captureError } from "@/lib/monitoring";
 
 /** Erro inesperado em qualquer tela. */
 export default function Erro({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error(error);
+    captureError(error);
   }, [error]);
   return (
     <ErrorState

@@ -88,6 +88,18 @@ dia (`notification_log`). No iPhone, push só funciona com o app instalado na te
 `supabase/tests/rls_smoke.sql` testa a RLS num Postgres local (dois usuários, um tentando ler/gravar dados do
 outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depois de `stub_supabase.sql` e das migrations.
 
+## Monitoramento e métricas
+
+- **Erros (Sentry):** defina `NEXT_PUBLIC_SENTRY_DSN` (e, se quiser, `SENTRY_DSN` no servidor). Sem DSN nada é carregado.
+  Não envia dados pessoais; a conta aparece só pelo id.
+- **Métricas (PostHog):** defina `NEXT_PUBLIC_POSTHOG_KEY`. Só carrega **depois do consentimento** (banner + chave em
+  Configurações → Privacidade). Sem gravação de tela, sem captura automática de textos, pessoa identificada só pelo id.
+  Eventos: `cadastro`, `onboarding_concluido`, `primeiro_checkin`, `dia_ativo` (1×/dia), `habito_criado`,
+  `lembretes_ativados`, `app_instalado`, `dados_exportados`, `conta_excluida`, `demo_iniciada`.
+  No PostHog, um _Retention insight_ com `cadastro` → `dia_ativo` mostra D1/D7/D30.
+- **Retenção direto do banco:** `supabase/analytics/retencao.sql` (SQL Editor) dá D1, D7 e D30 por semana de cadastro,
+  sem depender de terceiros nem de consentimento (usa só os registros do próprio app).
+
 ## Testes e CI
 
 | Comando                             | O que testa                                                                                                                                                                                   |

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
+import { ConsentBanner } from "@/components/providers/consent-banner";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { ThemeColorSync } from "@/components/providers/theme-color-sync";
 import { Toaster } from "@/components/ui/sonner";
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           {children}
           <ThemeColorSync />
           <ServiceWorkerRegister />
+          <ConsentBanner />
           <Toaster />
         </ThemeProvider>
       </body>

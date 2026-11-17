@@ -9,6 +9,7 @@ import { authErrorMessage } from "@/components/auth/auth-messages";
 import { emailSchema, passwordSchema } from "@/components/auth/schemas";
 import { PageHeader } from "@/components/layout/page-header";
 import { InstallSettings } from "@/components/settings/install-settings";
+import { PrivacySettings } from "@/components/settings/privacy-settings";
 import { RemindersSettings } from "@/components/settings/reminders-settings";
 import { useReadyData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Segmented } from "@/components/ui/segmented";
 import { downloadFile, snapshotToCsv, snapshotToJson } from "@/lib/data/export";
+import { track } from "@/lib/analytics";
 import { changeEmail, changePassword, currentEmail } from "@/lib/supabase/account";
 import { timezoneOptions } from "@/lib/timezones";
 
@@ -60,6 +62,7 @@ export default function ConfiguracoesPage() {
     const nomeArquivo = `zoryka-${today}.${formato}`;
     if (formato === "csv") downloadFile(nomeArquivo, snapshotToCsv(snapshot), "text/csv;charset=utf-8");
     else downloadFile(nomeArquivo, snapshotToJson(snapshot), "application/json");
+    track("dados_exportados", { formato });
     toast.success("Arquivo exportado.");
   };
 
@@ -131,6 +134,10 @@ export default function ConfiguracoesPage() {
 
       <Secao titulo="App">
         <InstallSettings />
+      </Secao>
+
+      <Secao titulo="Privacidade">
+        <PrivacySettings />
       </Secao>
 
       {conta && (

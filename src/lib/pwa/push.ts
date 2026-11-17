@@ -1,3 +1,5 @@
+import { track } from "@/lib/analytics";
+
 /** Notificações push no navegador (inscrição deste aparelho). */
 
 export type PushSupport = "ok" | "ios-instalar" | "sem-suporte" | "nao-configurado";
@@ -71,6 +73,7 @@ export async function enablePush(): Promise<"ativado" | "negado" | "erro"> {
       body: JSON.stringify(sub.toJSON()),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    track("lembretes_ativados");
     return "ativado";
   } catch (e) {
     console.error("Não foi possível ativar as notificações", e);

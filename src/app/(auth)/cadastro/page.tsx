@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function CadastroPage() {
     });
     setLoading(false);
     if (error) return setError(authErrorMessage(error.message));
+    track("cadastro");
     if (data.session) {
       router.replace("/onboarding");
       router.refresh();
