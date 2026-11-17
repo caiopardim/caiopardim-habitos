@@ -3,6 +3,8 @@ import { habit, log, task } from "../domain/test-helpers";
 import { DEFAULT_NOTIFICATION_PREFS } from "../domain/types";
 import { emptyProfile } from "./local-repository";
 import {
+  assinaturaRow,
+  pagamentoRow,
   areaRow,
   areaToRow,
   habitRow,
@@ -113,5 +115,42 @@ describe("conversão banco ⇄ app", () => {
     );
     expect(r.execucao).toBe(1);
     expect(r).toMatchObject({ user_id: "u1", pontuacao: 100, dia_perfeito: true });
+  });
+});
+
+describe("assinaturaRow / pagamentoRow", () => {
+  it("converte a assinatura", () => {
+    expect(
+      assinaturaRow.parse({
+        trial_ate: "2026-11-24T00:00:00Z",
+        premium_ate: null,
+        ciclo: null,
+        status: "sem_assinatura",
+        mp_preapproval_id: null,
+      }),
+    ).toEqual({
+      trialAte: "2026-11-24T00:00:00Z",
+      premiumAte: null,
+      ciclo: null,
+      status: "sem_assinatura",
+      recorrente: false,
+    });
+  });
+  it("recorrente só com preapproval não cancelado", () => {
+    const base = { trial_ate: null, premium_ate: null, ciclo: "mensal", mp_preapproval_id: "pre-1" };
+    expect(assinaturaRow.parse({ ...base, status: "ativa" }).recorrente).toBe(true);
+    expect(assinaturaRow.parse({ ...base, status: "cancelada" }).recorrente).toBe(false);
+  });
+  it("converte pagamento com valor numeric (string)", () => {
+    expect(
+      pagamentoRow.parse({
+        mp_payment_id: "42",
+        ciclo: "anual",
+        valor: "149.90",
+        metodo: "bank_transfer",
+        status: "approved",
+        criado_em: "2026-11-17T12:00:00Z",
+      }),
+    ).toMatchObject({ id: "42", valor: 149.9 });
   });
 });

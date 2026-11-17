@@ -1,3 +1,4 @@
+import type { Assinatura, Pagamento } from "../domain/billing";
 import type { DateStr, DaySummary, Habit, HabitLog, LifeArea, Profile, Task } from "../domain/types";
 
 export interface Snapshot {
@@ -9,6 +10,11 @@ export interface Snapshot {
   restDays: DateStr[];
   /** Medalhas conquistadas (permanentes). */
   achievements: UnlockedAchievement[];
+  /**
+   * Plano da conta (só no modo conta). Ausente = sem controle de planos (local, demonstração
+   * ou tabela ainda não criada): tudo liberado.
+   */
+  billing?: { assinatura: Assinatura; pagamentos: Pagamento[] } | null;
 }
 
 export interface UnlockedAchievement {

@@ -19,3 +19,9 @@ export const isSupabaseConfigured = Boolean(
  * em produção, recurso que não existe não aparece. Ligue com NEXT_PUBLIC_SHOW_ROADMAP=true no .env.local.
  */
 export const SHOW_ROADMAP = process.env.NEXT_PUBLIC_SHOW_ROADMAP === "true";
+
+/**
+ * Planos e cobrança (Mercado Pago). Desligado por padrão: o app funciona 100% grátis.
+ * Ligue com NEXT_PUBLIC_BILLING_ENABLED=true depois de configurar o Mercado Pago.
+ */
+export const BILLING_ENABLED = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";

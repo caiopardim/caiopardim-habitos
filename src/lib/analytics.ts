@@ -15,7 +15,10 @@ export type Evento =
   | "app_instalado"
   | "dados_exportados"
   | "conta_excluida"
-  | "demo_iniciada";
+  | "demo_iniciada"
+  | "paywall_visto"
+  | "checkout_iniciado"
+  | "renovacao_cancelada";
 
 export type Consentimento = "aceito" | "recusado" | null;
 

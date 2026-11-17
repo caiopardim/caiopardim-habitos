@@ -2,11 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DaySummary, Habit, HabitLog, LifeArea, Profile, Task } from "../domain/types";
 import {
   areaRow,
+  assinaturaRow,
   areaToRow,
   habitRow,
   habitToRow,
   logRow,
   logToRow,
+  pagamentoRow,
   profileRow,
   profileToRow,
   summaryToRow,
@@ -55,6 +57,7 @@ export class SupabaseRepository implements Repository {
       this.sb.from("rest_days").select("data"),
       this.sb.from("achievements").select("codigo, conquistado_em"),
     ]);
+    const billing = await this.loadBilling();
     return {
       profile: profileRow.parse(check(p)),
       areas: parseRows(areaRow, check(areas)),
@@ -66,6 +69,30 @@ export class SupabaseRepository implements Repository {
         codigo: r.codigo,
         conquistadoEm: r.conquistado_em,
       })),
+      billing,
+    };
+  }
+
+  /** Plano e pagamentos (só leitura). Se a migration de assinaturas não foi aplicada, nada é bloqueado. */
+  private async loadBilling(): Promise<Snapshot["billing"]> {
+    const [a, p] = await Promise.all([
+      this.sb
+        .from("assinaturas")
+        .select("trial_ate, premium_ate, ciclo, status, mp_preapproval_id")
+        .eq("user_id", this.userId)
+        .maybeSingle(),
+      this.sb
+        .from("pagamentos")
+        .select("mp_payment_id, ciclo, valor, metodo, status, criado_em")
+        .order("criado_em", { ascending: false })
+        .limit(50),
+    ]);
+    if (a.error || !a.data) return null;
+    const assinatura = assinaturaRow.safeParse(a.data);
+    if (!assinatura.success) return null;
+    return {
+      assinatura: assinatura.data,
+      pagamentos: p.error ? [] : parseRows(pagamentoRow, p.data),
     };
   }
 
@@ -165,6 +192,9 @@ export class SupabaseRepository implements Repository {
 
   /** Exclui a conta (função delete_my_account no banco; o cascade apaga os dados). */
   async deleteAccount() {
+    // Cancela a renovação no cartão antes de apagar a conta (senão o Mercado Pago seguiria cobrando).
+    const r = await fetch("/api/billing/cancel", { method: "POST" }).catch(() => null);
+    if (r && r.status === 502) throw new DataError("Não foi possível cancelar a renovação automática.");
     check(await this.sb.rpc("delete_my_account"));
     await this.sb.auth.signOut();
   }

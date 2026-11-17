@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Download, LogOut, Mail, KeyRound, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { authErrorMessage } from "@/components/auth/auth-messages";
 import { emailSchema, passwordSchema } from "@/components/auth/schemas";
+import { usePlan } from "@/components/billing/use-plan";
 import { PageHeader } from "@/components/layout/page-header";
 import { InstallSettings } from "@/components/settings/install-settings";
 import { PrivacySettings } from "@/components/settings/privacy-settings";
@@ -27,6 +28,8 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Segmented } from "@/components/ui/segmented";
 import { downloadFile, snapshotToCsv, snapshotToJson } from "@/lib/data/export";
 import { track } from "@/lib/analytics";
+import { getPlanoPreview, setPlanoPreview, subscribePlanoPreview } from "@/lib/demo/plan-preview";
+import { PLANO_LABEL } from "@/lib/domain/billing";
 import { changeEmail, changePassword, currentEmail } from "@/lib/supabase/account";
 import { timezoneOptions } from "@/lib/timezones";
 
@@ -46,6 +49,8 @@ export default function ConfiguracoesPage() {
   const { theme, setTheme } = useTheme();
   const p = snapshot.profile;
   const conta = repoKind === "supabase";
+  const plano = usePlan();
+  const planoPreview = useSyncExternalStore(subscribePlanoPreview, getPlanoPreview, () => "premium" as const);
   const [nome, setNome] = useState(p.nome);
   const [email, setEmail] = useState<string | null>(null);
   const [novoEmail, setNovoEmail] = useState("");
@@ -127,6 +132,25 @@ export default function ConfiguracoesPage() {
           />
         </Field>
       </Secao>
+
+      {plano.controlado && (
+        <Secao titulo="Plano">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm">
+              <strong>{PLANO_LABEL[plano.direito.plano]}</strong>
+              {plano.direito.ate && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  até {new Date(plano.direito.ate).toLocaleDateString("pt-BR")}
+                </span>
+              )}
+            </p>
+            <Button variant="secondary" asChild>
+              <Link href="/assinatura">Minha assinatura</Link>
+            </Button>
+          </div>
+        </Secao>
+      )}
 
       <Secao titulo="Lembretes">
         <RemindersSettings />
@@ -221,6 +245,18 @@ export default function ConfiguracoesPage() {
           <p className="text-muted-foreground text-sm">
             Você está vendo dados fictícios. Nada do que você marcar aqui vai para uma conta.
           </p>
+          <Field label="Ver o app como">
+            <Segmented
+              label="Ver o app como"
+              value={planoPreview}
+              onChange={setPlanoPreview}
+              options={[
+                { value: "premium", label: "Premium" },
+                { value: "teste", label: "Teste" },
+                { value: "gratis", label: "Grátis" },
+              ]}
+            />
+          </Field>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button asChild className="sm:flex-1">
               <Link href="/cadastro">Criar minha conta</Link>
@@ -297,7 +333,7 @@ export default function ConfiguracoesPage() {
               <DialogTitle>{conta ? "Excluir sua conta?" : "Apagar todos os dados?"}</DialogTitle>
               <DialogDescription>
                 {conta
-                  ? "Sua conta e todos os seus hábitos, registros e conquistas serão apagados para sempre. Isso não pode ser desfeito."
+                  ? "Sua conta e todos os seus hábitos, registros e conquistas serão apagados para sempre. Isso não pode ser desfeito. Se houver renovação automática no cartão, ela é cancelada."
                   : "Todos os hábitos e registros salvos neste navegador serão apagados. Isso não pode ser desfeito."}{" "}
                 Se quiser guardar uma cópia, exporte seus dados antes.
               </DialogDescription>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PERIOD_LABEL, type PeriodPreset } from "@/lib/domain/evolution";
 import type { DateStr } from "@/lib/domain/types";
@@ -13,12 +14,17 @@ export function PeriodPicker({
   custom,
   onCustom,
   today,
+  bloqueado,
+  onBloqueado,
 }: {
   value: PeriodPreset;
   onChange: (p: PeriodPreset) => void;
   custom: { from: DateStr; to: DateStr };
   onCustom: (c: { from: DateStr; to: DateStr }) => void;
   today: DateStr;
+  /** Períodos fora do plano: aparecem com cadeado e chamam `onBloqueado`. */
+  bloqueado?: (p: PeriodPreset) => boolean;
+  onBloqueado?: () => void;
 }) {
   return (
     <div className="space-y-3">
@@ -27,23 +33,28 @@ export function PeriodPicker({
         aria-label="Período"
         className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0"
       >
-        {PRESETS.map((p) => (
-          <button
-            key={p}
-            type="button"
-            role="radio"
-            aria-checked={value === p}
-            onClick={() => onChange(p)}
-            className={cn(
-              "focus-visible:ring-ring/50 h-11 shrink-0 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-none",
-              value === p
-                ? "border-foreground bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {PERIOD_LABEL[p]}
-          </button>
-        ))}
+        {PRESETS.map((p) => {
+          const travado = bloqueado?.(p) ?? false;
+          return (
+            <button
+              key={p}
+              type="button"
+              role="radio"
+              aria-checked={value === p}
+              aria-label={travado ? `${PERIOD_LABEL[p]} (Premium)` : undefined}
+              onClick={() => (travado ? onBloqueado?.() : onChange(p))}
+              className={cn(
+                "focus-visible:ring-ring/50 h-11 shrink-0 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-none",
+                value === p
+                  ? "border-foreground bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {travado && <Lock className="-mt-0.5 mr-1 inline size-3.5" aria-hidden />}
+              {PERIOD_LABEL[p]}
+            </button>
+          );
+        })}
       </div>
       {value === "custom" && (
         <div className="grid grid-cols-2 gap-3">

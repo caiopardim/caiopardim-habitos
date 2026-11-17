@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { BedDouble, ChevronRight, Settings, Trophy } from "lucide-react";
+import { PremiumLock } from "@/components/billing/paywall";
+import { usePlan } from "@/components/billing/use-plan";
 import { AvatarCard } from "@/components/avatar/avatar-card";
 import { Medal } from "@/components/gamification/medal";
 import { RestDayInfo } from "@/components/gamification/rest-day-info";
@@ -18,6 +20,7 @@ import { formatLongDate } from "@/lib/format-date";
 export default function PerfilPage() {
   const { snapshot, history, today } = useReadyData();
   const { medalhas, temporadas } = useGamification();
+  const plano = usePlan();
   const { level, streak, xpTotal, diasPerfeitos } = history;
 
   const stats = [
@@ -81,45 +84,47 @@ export default function PerfilPage() {
       </div>
 
       {/* Temporadas */}
-      <section aria-labelledby="temporadas" className="bg-card space-y-3 rounded-xl border p-4">
-        <h2 id="temporadas" className="flex items-center gap-2 text-base font-bold">
-          <Trophy className="text-primary size-5" aria-hidden />
-          Temporadas
-        </h2>
-        <dl className="grid grid-cols-3 gap-2 text-center">
-          {[
-            ["Atual", temporadas.atual.numero],
-            ["Recorde", temporadas.recorde],
-            ["Concluídas", temporadas.concluidas],
-          ].map(([l, v]) => (
-            <div key={String(l)} className="bg-muted rounded-lg p-2">
-              <dt className="text-muted-foreground text-[11px]">{l}</dt>
-              <dd className="text-xl font-bold tabular-nums">{v}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="text-muted-foreground text-sm">
-          Temporada {temporadas.atual.numero}: dia {Math.min(temporadas.atual.dia, 7)} de 7 ·{" "}
-          {SEASON_STATUS_LABEL[temporadas.atual.status]} · meta média ≥ {temporadas.atual.meta}
-        </p>
-        {temporadas.historico.length > 0 && (
-          <ol className="flex flex-wrap gap-1.5" aria-label="Últimas temporadas">
-            {temporadas.historico.slice(-10).map((t) => (
-              <li
-                key={t.inicio}
-                title={`Temporada ${t.numero} (${SEASON_STATUS_LABEL[t.status]}) — média ${t.media === null ? "—" : Math.round(t.media)} / meta ${t.meta}`}
-                className={
-                  t.status === "concluida"
-                    ? "bg-brand-orange text-primary-foreground grid size-8 place-items-center rounded-full text-xs font-bold"
-                    : "bg-muted text-muted-foreground grid size-8 place-items-center rounded-full text-xs font-bold"
-                }
-              >
-                {t.numero}
-              </li>
+      <PremiumLock motivo="temporadas" bloqueado={!plano.direito.premium}>
+        <section aria-labelledby="temporadas" className="bg-card space-y-3 rounded-xl border p-4">
+          <h2 id="temporadas" className="flex items-center gap-2 text-base font-bold">
+            <Trophy className="text-primary size-5" aria-hidden />
+            Temporadas
+          </h2>
+          <dl className="grid grid-cols-3 gap-2 text-center">
+            {[
+              ["Atual", temporadas.atual.numero],
+              ["Recorde", temporadas.recorde],
+              ["Concluídas", temporadas.concluidas],
+            ].map(([l, v]) => (
+              <div key={String(l)} className="bg-muted rounded-lg p-2">
+                <dt className="text-muted-foreground text-[11px]">{l}</dt>
+                <dd className="text-xl font-bold tabular-nums">{v}</dd>
+              </div>
             ))}
-          </ol>
-        )}
-      </section>
+          </dl>
+          <p className="text-muted-foreground text-sm">
+            Temporada {temporadas.atual.numero}: dia {Math.min(temporadas.atual.dia, 7)} de 7 ·{" "}
+            {SEASON_STATUS_LABEL[temporadas.atual.status]} · meta média ≥ {temporadas.atual.meta}
+          </p>
+          {temporadas.historico.length > 0 && (
+            <ol className="flex flex-wrap gap-1.5" aria-label="Últimas temporadas">
+              {temporadas.historico.slice(-10).map((t) => (
+                <li
+                  key={t.inicio}
+                  title={`Temporada ${t.numero} (${SEASON_STATUS_LABEL[t.status]}) — média ${t.media === null ? "—" : Math.round(t.media)} / meta ${t.meta}`}
+                  className={
+                    t.status === "concluida"
+                      ? "bg-brand-orange text-primary-foreground grid size-8 place-items-center rounded-full text-xs font-bold"
+                      : "bg-muted text-muted-foreground grid size-8 place-items-center rounded-full text-xs font-bold"
+                  }
+                >
+                  {t.numero}
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      </PremiumLock>
 
       {/* Medalhas */}
       <section aria-labelledby="medalhas" className="bg-card space-y-3 rounded-xl border p-4">

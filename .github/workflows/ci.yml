@@ -35,7 +35,7 @@ jobs:
         run: npm run build
       - name: Nenhum segredo no código do navegador
         run: |
-          if grep -rlE "SUPABASE_SERVICE_ROLE|VAPID_PRIVATE|CRON_SECRET|service_role" .next/static; then
+          if grep -rlE "SUPABASE_SERVICE_ROLE|VAPID_PRIVATE|CRON_SECRET|service_role|MERCADOPAGO_ACCESS|MERCADOPAGO_WEBHOOK|APP_USR-" .next/static; then
             echo "::error::Segredo encontrado no bundle do navegador"; exit 1
           fi
       - name: Navegador para os testes de ponta a ponta

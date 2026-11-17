@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
+import { PaywallProvider } from "@/components/billing/paywall";
 import { CelebrationCenter } from "@/components/gamification/celebration-center";
 import { useAppData } from "@/components/providers/app-data";
 import { ZorykaLogo } from "@/components/brand/logo";
@@ -55,7 +56,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="md:hidden">
           <ModeBadge kind={repoKind} />
         </div>
-        <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-28 md:px-8 md:pt-8 md:pb-12">{children}</main>
+        <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-28 md:px-8 md:pt-8 md:pb-12">
+          <PaywallProvider>{children}</PaywallProvider>
+        </main>
       </div>
 
       {/* Barra inferior (celular) */}

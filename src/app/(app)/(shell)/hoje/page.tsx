@@ -16,6 +16,8 @@ import { AreasCard } from "@/components/today/areas-card";
 import { AvoidItem } from "@/components/today/avoid-item";
 import { DateStrip } from "@/components/today/date-strip";
 import { HabitMission, TaskMission } from "@/components/today/mission-item";
+import { PlanBanner } from "@/components/billing/plan-banner";
+import { usePlan } from "@/components/billing/use-plan";
 import { SeasonCard } from "@/components/today/season-card";
 import { StatCards, TodayHero } from "@/components/today/summary-cards";
 import { Button } from "@/components/ui/button";
@@ -52,6 +54,7 @@ export default function HojePage() {
   const data = useReadyData();
   const { snapshot, history, today, summaryFor, logFor, canEdit } = data;
   const avatar = useAvatar();
+  const plano = usePlan();
   const [date, setDate] = useState<DateStr>(today);
   const [editing, setEditing] = useState<Task | null>(null);
 
@@ -260,7 +263,8 @@ export default function HojePage() {
         level={history.level}
         isToday={isToday}
       />
-      {isToday && <SeasonCard season={seasons.atual} />}
+      {isToday && plano.direito.premium && <SeasonCard season={seasons.atual} />}
+      {isToday && <PlanBanner />}
       {isToday && <EngagementCard />}
       {isToday && isReviewDay(today) && (
         <Link

@@ -88,6 +88,37 @@ dia (`notification_log`). No iPhone, push só funciona com o app instalado na te
 `supabase/tests/rls_smoke.sql` testa a RLS num Postgres local (dois usuários, um tentando ler/gravar dados do
 outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depois de `stub_supabase.sql` e das migrations.
 
+## Planos e pagamentos (Mercado Pago)
+
+**Desligado por padrão** (`NEXT_PUBLIC_BILLING_ENABLED=false`): o app funciona todo grátis. Para ligar:
+
+| Plano          | Preço     | Como paga                                                         | Libera                                   |
+| -------------- | --------- | ----------------------------------------------------------------- | ---------------------------------------- |
+| Grátis         | —         | —                                                                 | até 3 hábitos ativos, Evolução de 7 dias |
+| Teste          | grátis    | sem cartão, automático no cadastro                                | Premium por 7 dias                       |
+| Premium mensal | R$ 19,90  | cartão com renovação automática **ou** Pix (30 dias, sem renovar) | tudo                                     |
+| Premium anual  | R$ 149,90 | Pix ou cartão em até 12x                                          | tudo por 365 dias (−37%)                 |
+
+Premium = hábitos ilimitados, Evolução de qualquer período, insights, calendário do ano e temporadas. Quem passa do
+limite nunca perde hábitos nem registros: só não cria novos acima de 3 ativos.
+
+1. Aplique `supabase/migrations/20261119000000_assinaturas.sql` (cria `assinaturas` e `pagamentos`; o usuário **só lê**;
+   quem grava é o servidor com a service role). Dá 7 dias de teste também a quem já tem conta.
+2. No [painel do Mercado Pago](https://www.mercadopago.com.br/developers/panel/app): crie uma aplicação, copie o
+   **Access Token de produção** para `MERCADOPAGO_ACCESS_TOKEN`.
+3. Em **Webhooks**, cadastre `https://SEU_DOMINIO/api/billing/webhook` nos eventos **Pagamentos** e **Planos e
+   assinaturas** e copie a **assinatura secreta** para `MERCADOPAGO_WEBHOOK_SECRET`.
+4. Defina `NEXT_PUBLIC_SITE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e, por fim, `NEXT_PUBLIC_BILLING_ENABLED=true` (refaça o deploy).
+5. Teste com as [credenciais e cartões de teste](https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/additional-content/your-integrations/test/cards)
+   antes de usar as de produção.
+
+**Segurança:** o Premium só é liberado pelo webhook, que confere a assinatura `x-signature` (HMAC) **e** busca o
+pagamento direto na API do Mercado Pago (nunca confia no corpo da notificação), confere o valor e é idempotente
+(o mesmo pagamento não libera dias duas vezes; estorno devolve os dias). Excluir a conta cancela a renovação no cartão.
+Regras em `src/lib/domain/billing.ts`; webhook em `src/lib/billing/webhook.ts` (ambos com testes).
+
+Na **demonstração**, Configurações → "Ver o app como" mostra o app como Premium, Teste ou Grátis (só visual).
+
 ## Monitoramento e métricas
 
 - **Erros (Sentry):** defina `NEXT_PUBLIC_SENTRY_DSN` (e, se quiser, `SENTRY_DSN` no servidor). Sem DSN nada é carregado.
@@ -95,7 +126,8 @@ outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depoi
 - **Métricas (PostHog):** defina `NEXT_PUBLIC_POSTHOG_KEY`. Só carrega **depois do consentimento** (banner + chave em
   Configurações → Privacidade). Sem gravação de tela, sem captura automática de textos, pessoa identificada só pelo id.
   Eventos: `cadastro`, `onboarding_concluido`, `primeiro_checkin`, `dia_ativo` (1×/dia), `habito_criado`,
-  `lembretes_ativados`, `app_instalado`, `dados_exportados`, `conta_excluida`, `demo_iniciada`.
+  `lembretes_ativados`, `app_instalado`, `dados_exportados`, `conta_excluida`, `demo_iniciada`, `paywall_visto`,
+  `checkout_iniciado`, `renovacao_cancelada`.
   No PostHog, um _Retention insight_ com `cadastro` → `dia_ativo` mostra D1/D7/D30.
 - **Retenção direto do banco:** `supabase/analytics/retencao.sql` (SQL Editor) dá D1, D7 e D30 por semana de cadastro,
   sem depender de terceiros nem de consentimento (usa só os registros do próprio app).
@@ -187,6 +219,6 @@ supabase/migrations/  schema versionado com RLS
 - [x] **Fase 2** — Evolução: filtros, gráficos, por hábito com heatmap, insights automáticos e revisão semanal
 - [x] **Fase 3** — Gamificação: temporadas, 25 medalhas, celebrações em tela cheia com compartilhamento, evolução do avatar animada
 - [x] **Fase 4** — PWA, offline com fila de sincronização, lembretes por push, exportar CSV, excluir conta
-- [ ] **Fase 5** — Monetização
+- [x] **Fase 5** — Planos: grátis, teste de 7 dias e Premium (Mercado Pago: Pix e cartão), paywall e Minha assinatura
 
 > A Zoryka não substitui acompanhamento profissional de saúde.

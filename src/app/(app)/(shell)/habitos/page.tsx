@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { HabitIcon } from "@/components/habits/habit-icon";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { usePaywall } from "@/components/billing/paywall";
+import { usePlan } from "@/components/billing/use-plan";
+import { LIMITES_GRATIS } from "@/lib/domain/billing";
 import { useReadyData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,17 +38,25 @@ export default function HabitosPage() {
   const { snapshot, today, setArchived, deleteHabit } = useReadyData();
   const [editing, setEditing] = useState<{ habit: Habit; isNew: boolean } | null>(null);
   const [tab, setTab] = useState("bons");
+  const plano = usePlan();
+  const abrirPaywall = usePaywall();
+  /** Abre o formulário de novo hábito, ou o convite ao Premium se o limite do grátis acabou. */
+  const novoHabito = (tipo: "bom" | "mau") => {
+    if (!plano.podeAdicionarHabito) return abrirPaywall("habitos");
+    setEditing({ habit: blankHabit(tipo, today), isNew: true });
+  };
 
   // /habitos?novo=bom|mau abre direto o formulário (atalho dos estados vazios).
   useEffect(() => {
     const novo = new URLSearchParams(window.location.search).get("novo");
     if (novo === "bom" || novo === "mau") {
       setTab(novo === "mau" ? "maus" : "bons");
-      setEditing({ habit: blankHabit(novo, today), isNew: true });
+      novoHabito(novo);
       window.history.replaceState(null, "", "/habitos");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só na primeira abertura
   }, [today]);
-  const criar = (tipo: "bom" | "mau") => setEditing({ habit: blankHabit(tipo, today), isNew: true });
+  const criar = novoHabito;
 
   const ativos = snapshot.habits.filter((h) => !h.arquivado);
   const bons = ativos.filter((h) => h.tipo === "bom");
@@ -108,6 +119,7 @@ export default function HabitosPage() {
             size="icon"
             aria-label={h.arquivado ? `Reativar ${h.nome}` : `Arquivar ${h.nome}`}
             onClick={async () => {
+              if (h.arquivado && !plano.podeAdicionarHabito) return abrirPaywall("habitos");
               await setArchived(h, !h.arquivado);
               toast.success(h.arquivado ? "Hábito reativado." : "Hábito arquivado. O histórico foi mantido.");
             }}
@@ -143,15 +155,21 @@ export default function HabitosPage() {
         title="Hábitos"
         subtitle={`${bons.length} para fazer · ${maus.length} para evitar`}
         action={
-          <Button
-            onClick={() =>
-              setEditing({ habit: blankHabit(tab === "maus" ? "mau" : "bom", today), isNew: true })
-            }
-          >
+          <Button onClick={() => novoHabito(tab === "maus" ? "mau" : "bom")}>
             <Plus /> Novo
           </Button>
         }
       />
+      {plano.controlado && !plano.direito.premium && (
+        <p className="text-muted-foreground mb-3 text-sm">
+          {ativos.length > LIMITES_GRATIS.habitosAtivos
+            ? `Plano grátis: seus ${ativos.length} hábitos seguem funcionando; novos só com até ${LIMITES_GRATIS.habitosAtivos} ativos.`
+            : `Plano grátis: ${ativos.length} de ${LIMITES_GRATIS.habitosAtivos} hábitos ativos.`}{" "}
+          <Link href="/planos" className="text-xp font-medium underline-offset-4 hover:underline">
+            Conhecer o Premium
+          </Link>
+        </p>
+      )}
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="bons">Para fazer</TabsTrigger>

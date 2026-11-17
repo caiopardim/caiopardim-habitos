@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { HabitIcon } from "@/components/habits/habit-icon";
 import { AreaBars } from "@/components/evolution/area-bars";
+import { PremiumLock, usePaywall } from "@/components/billing/paywall";
+import { usePlan } from "@/components/billing/use-plan";
 import { InsightsCard } from "@/components/evolution/insights-card";
 import { PeriodPicker } from "@/components/evolution/period-picker";
 import { WeeklyReviewCard } from "@/components/evolution/weekly-review-card";
@@ -51,6 +53,7 @@ const HabitBarChart = dynamic(() => import("@/components/evolution/charts").then
   loading: chartSkeleton,
 });
 
+const PRESETS_GRATIS = new Set<PeriodPreset>(["hoje", "ontem", "7d"]);
 const MIN_DIAS = 3;
 const MESES = [
   "janeiro",
@@ -138,7 +141,10 @@ function Variacao({ v }: { v: number | null }) {
 
 export default function EvolucaoPage() {
   const { snapshot, history, today } = useReadyData();
-  const [preset, setPreset] = useState<PeriodPreset>("30d");
+  const plano = usePlan();
+  const abrirPaywall = usePaywall();
+  const livre = plano.direito.premium;
+  const [preset, setPreset] = useState<PeriodPreset>(livre ? "30d" : "7d");
   const [custom, setCustom] = useState({ from: addDays(today, -13), to: today });
   const [habitoId, setHabitoId] = useState<string>("geral");
 
@@ -284,7 +290,15 @@ export default function EvolucaoPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Evolução" subtitle="Registre → revise → aprenda → ajuste" />
-      <PeriodPicker value={preset} onChange={setPreset} custom={custom} onCustom={setCustom} today={today} />
+      <PeriodPicker
+        value={preset}
+        onChange={setPreset}
+        custom={custom}
+        onCustom={setCustom}
+        today={today}
+        bloqueado={livre ? undefined : (p) => !PRESETS_GRATIS.has(p)}
+        onBloqueado={() => abrirPaywall("evolucao")}
+      />
       <p className="text-muted-foreground -mt-2 text-xs">{formatRange(periodo.from, periodo.to)}</p>
 
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
@@ -311,7 +325,9 @@ export default function EvolucaoPage() {
       </div>
 
       <WeeklyReviewCard review={revisao} destaque={isReviewDay(today)} />
-      <InsightsCard insights={insights} />
+      <PremiumLock motivo="insights" bloqueado={!livre}>
+        <InsightsCard insights={insights} />
+      </PremiumLock>
 
       {!umDia && (
         <Card id="pontuacao" title="Pontuação do Dia">
@@ -443,7 +459,7 @@ export default function EvolucaoPage() {
                   </p>
                 </>
               )}
-              {heatHabito && (
+              {heatHabito && livre && (
                 <div className="space-y-1">
                   <p className="text-muted-foreground text-xs font-medium">Últimos 12 meses</p>
                   <YearHeatmap
@@ -499,33 +515,37 @@ export default function EvolucaoPage() {
         <AreaBars areas={snapshot.areas} stats={areas} />
       </Card>
 
-      <Card id="constancia" title="Constância no último ano">
-        <YearHeatmap
-          semanas={heat.semanas}
-          label="Heatmap de constância dos últimos 12 meses"
-          describe={(c) =>
-            c.pontuacao === null ? "sem itens" : c.nivel === 4 ? "dia perfeito" : `pontuação ${c.pontuacao}`
-          }
-        />
-        {(heat.melhorMes || heat.piorMes) && (
-          <div className="grid gap-2 text-sm sm:grid-cols-2">
-            {heat.melhorMes && (
-              <p className="bg-muted flex items-center gap-2 rounded-lg p-2.5">
-                <span className="size-3 rounded-[3px]" style={{ background: HEAT_FILL[4] }} aria-hidden />
-                Melhor mês: <strong className="capitalize">{nomeMes(heat.melhorMes.mes)}</strong> (média{" "}
-                {Math.round(heat.melhorMes.media)})
-              </p>
-            )}
-            {heat.piorMes && (
-              <p className="bg-muted flex items-center gap-2 rounded-lg p-2.5">
-                <span className="size-3 rounded-[3px]" style={{ background: HEAT_FILL[1] }} aria-hidden />
-                Mais difícil: <strong className="capitalize">{nomeMes(heat.piorMes.mes)}</strong> (média{" "}
-                {Math.round(heat.piorMes.media)})
-              </p>
-            )}
-          </div>
-        )}
-      </Card>
+      <PremiumLock motivo="calendario" bloqueado={!livre}>
+        <Card id="constancia" title="Constância no último ano">
+          <YearHeatmap
+            semanas={heat.semanas}
+            label="Heatmap de constância dos últimos 12 meses"
+            describe={(c) =>
+              c.pontuacao === null ? "sem itens" : c.nivel === 4 ? "dia perfeito" : `pontuação ${c.pontuacao}`
+            }
+          />
+          {(heat.melhorMes || heat.piorMes) && (
+            <div className="grid gap-2 text-sm sm:grid-cols-2">
+              {heat.melhorMes && (
+                <p className="bg-muted flex items-center gap-2 rounded-lg p-2.5">
+                  <span className="size-3 rounded-[3px]" style={{ background: HEAT_FILL[4] }} aria-hidden />
+                  Melhor mês: <strong className="capitalize">
+                    {nomeMes(heat.melhorMes.mes)}
+                  </strong> (média {Math.round(heat.melhorMes.media)})
+                </p>
+              )}
+              {heat.piorMes && (
+                <p className="bg-muted flex items-center gap-2 rounded-lg p-2.5">
+                  <span className="size-3 rounded-[3px]" style={{ background: HEAT_FILL[1] }} aria-hidden />
+                  Mais difícil: <strong className="capitalize">
+                    {nomeMes(heat.piorMes.mes)}
+                  </strong> (média {Math.round(heat.piorMes.media)})
+                </p>
+              )}
+            </div>
+          )}
+        </Card>
+      </PremiumLock>
     </div>
   );
 }

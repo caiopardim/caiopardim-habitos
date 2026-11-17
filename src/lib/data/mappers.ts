@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Assinatura, Pagamento } from "../domain/billing";
 import {
   DEFAULT_NOTIFICATION_PREFS,
   type DaySummary,
@@ -224,3 +225,37 @@ export const summaryToRow = (s: DaySummary, userId: string) => ({
   conta_sequencia: s.contaSequencia,
   atualizado_em: new Date().toISOString(),
 });
+
+export const assinaturaRow = z
+  .object({
+    trial_ate: z.string().nullable(),
+    premium_ate: z.string().nullable(),
+    ciclo: z.enum(["mensal", "anual"]).nullable(),
+    status: z.enum(["sem_assinatura", "pendente", "ativa", "cancelada", "pausada"]),
+    mp_preapproval_id: z.string().nullable().optional(),
+  })
+  .transform((r): Assinatura => ({
+    trialAte: r.trial_ate,
+    premiumAte: r.premium_ate,
+    ciclo: r.ciclo,
+    status: r.status,
+    recorrente: Boolean(r.mp_preapproval_id) && r.status !== "cancelada",
+  }));
+
+export const pagamentoRow = z
+  .object({
+    mp_payment_id: z.string(),
+    ciclo: z.enum(["mensal", "anual"]),
+    valor: num,
+    metodo: z.string().nullable(),
+    status: z.string(),
+    criado_em: z.string(),
+  })
+  .transform((r): Pagamento => ({
+    id: r.mp_payment_id,
+    ciclo: r.ciclo,
+    valor: r.valor,
+    metodo: r.metodo,
+    status: r.status,
+    criadoEm: r.criado_em,
+  }));

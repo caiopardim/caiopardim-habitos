@@ -2,7 +2,16 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { entrarDemo } from "./helpers";
 
-const TELAS = ["/hoje", "/habitos", "/evolucao", "/perfil", "/conquistas", "/configuracoes"];
+const TELAS = [
+  "/hoje",
+  "/habitos",
+  "/evolucao",
+  "/perfil",
+  "/conquistas",
+  "/configuracoes",
+  "/planos",
+  "/assinatura",
+];
 
 for (const tema of ["dark", "light"] as const) {
   test(`sem violações WCAG 2.1 AA (tema ${tema === "dark" ? "escuro" : "claro"})`, async ({ page }) => {
