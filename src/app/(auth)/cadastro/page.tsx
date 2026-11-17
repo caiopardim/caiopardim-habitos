@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
+import { LEGAL } from "@/lib/legal";
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -29,7 +30,8 @@ export default function CadastroPage() {
       email,
       password,
       options: {
-        data: { nome },
+        // Registro do consentimento (LGPD art. 8º e 11): versão do texto e momento do aceite.
+        data: { nome, consentimento: { versao: LEGAL.versao, em: new Date().toISOString() } },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
       },
     });
@@ -80,6 +82,27 @@ export default function CadastroPage() {
           />
           <p className="text-muted-foreground text-xs">Mínimo de 8 caracteres.</p>
         </div>
+        <label htmlFor="aceite" className="flex min-h-11 items-start gap-3 text-sm leading-snug">
+          <input
+            id="aceite"
+            name="aceite"
+            type="checkbox"
+            required
+            className="accent-primary mt-0.5 size-5 shrink-0"
+          />
+          <span>
+            Li e aceito os{" "}
+            <Link href="/termos" target="_blank" className="font-semibold underline underline-offset-2">
+              Termos de uso
+            </Link>{" "}
+            e a{" "}
+            <Link href="/privacidade" target="_blank" className="font-semibold underline underline-offset-2">
+              Política de privacidade
+            </Link>
+            , e autorizo o uso dos meus registros de hábitos — que podem envolver saúde — para o funcionamento
+            do app.
+          </span>
+        </label>
         {error && (
           <p role="alert" className="text-danger text-sm">
             {error}

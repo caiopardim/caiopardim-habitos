@@ -8,4 +8,6 @@ export const signupSchema = z.object({
   nome: z.string().trim().min(1, "Informe seu nome.").max(60),
   email: emailSchema,
   password: passwordSchema,
+  // checkbox do formulário: "on" quando marcado
+  aceite: z.literal("on", { message: "Para criar a conta, aceite os termos e a política de privacidade." }),
 });

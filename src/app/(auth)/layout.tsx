@@ -36,6 +36,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </Button>
         </div>
       )}
+      <p className="text-muted-foreground flex justify-center gap-4 text-xs">
+        <Link href="/privacidade" className="inline-flex min-h-11 items-center underline underline-offset-4">
+          Privacidade
+        </Link>
+        <Link href="/termos" className="inline-flex min-h-11 items-center underline underline-offset-4">
+          Termos de uso
+        </Link>
+      </p>
     </main>
   );
 }

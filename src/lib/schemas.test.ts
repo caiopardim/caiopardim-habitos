@@ -52,3 +52,15 @@ describe("validação de formulários", () => {
     ).toBe(false);
   });
 });
+
+describe("cadastro (LGPD)", async () => {
+  const { signupSchema } = await import("@/components/auth/schemas");
+  const base = { nome: "Ana", email: "ana@exemplo.com", password: "12345678" };
+
+  it("exige o aceite dos termos e do uso de dados sensíveis", () => {
+    const sem = signupSchema.safeParse(base);
+    expect(sem.success).toBe(false);
+    expect(sem.error?.issues[0].message).toMatch(/aceite os termos/);
+    expect(signupSchema.safeParse({ ...base, aceite: "on" }).success).toBe(true);
+  });
+});

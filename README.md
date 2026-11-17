@@ -100,6 +100,24 @@ outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depoi
 - **Retenção direto do banco:** `supabase/analytics/retencao.sql` (SQL Editor) dá D1, D7 e D30 por semana de cadastro,
   sem depender de terceiros nem de consentimento (usa só os registros do próprio app).
 
+## Segurança e LGPD
+
+- **RLS em todas as tabelas**, com testes: `supabase/tests/rls_smoke.sql`, `conta_smoke.sql`, `lembretes_smoke.sql`
+  e a auditoria `supabase/tests/audit_rls.sql` (deve voltar vazia). O CI falha se alguma chave secreta aparecer no
+  código do navegador.
+- **Política de privacidade** (`/privacidade`) e **Termos de uso** (`/termos`), específicos do app (dados,
+  finalidades, bases legais, fornecedores, retenção, direitos). Preencha os dados do responsável nas variáveis
+  `NEXT_PUBLIC_LEGAL_*` e `NEXT_PUBLIC_CONTATO_EMAIL` — sem elas as páginas mostram "[a preencher]".
+  **Revise os textos com um advogado antes de abrir ao público.**
+- **Consentimento:** aceite dos termos e do tratamento de dados sensíveis (hábitos podem envolver saúde) no cadastro,
+  guardado com versão e data em `auth.users.raw_user_meta_data.consentimento`; medições de uso só com consentimento.
+- **Direitos do titular no próprio app:** exportar (CSV/JSON) e excluir a conta.
+- **Saúde:** aviso de que o app não substitui acompanhamento profissional, com o CVV (188), no onboarding, ao criar
+  hábitos a evitar, nas Configurações e nas páginas legais.
+- **Backups:** o plano Pro do Supabase faz backup diário automático (com restauração a um ponto no tempo como
+  adicional). No plano grátis não há backup automático: faça `supabase db dump` periodicamente e guarde em local
+  privado. **Nunca** publique dumps no GitHub — este repositório é público.
+
 ## Testes e CI
 
 | Comando                             | O que testa                                                                                                                                                                                   |

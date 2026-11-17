@@ -324,20 +324,26 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
           )}
         </>
       ) : (
-        <Field
-          id="inicio"
-          label="Início do controle"
-          error={errors.inicio}
-          hint="O contador de dias começa aqui."
-        >
-          <Input
+        <>
+          <p className="bg-muted rounded-lg p-3 text-xs leading-relaxed">
+            A Zoryka não substitui acompanhamento médico ou psicológico. Se estiver difícil, o CVV atende de
+            graça, 24h, pelo telefone <strong>188</strong>.
+          </p>
+          <Field
             id="inicio"
-            type="date"
-            max={today}
-            value={v.inicio}
-            onChange={(e) => set("inicio", e.target.value)}
-          />
-        </Field>
+            label="Início do controle"
+            error={errors.inicio}
+            hint="O contador de dias começa aqui."
+          >
+            <Input
+              id="inicio"
+              type="date"
+              max={today}
+              value={v.inicio}
+              onChange={(e) => set("inicio", e.target.value)}
+            />
+          </Field>
+        </>
       )}
 
       <DialogFooter>

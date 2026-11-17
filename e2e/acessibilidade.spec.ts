@@ -8,7 +8,7 @@ for (const tema of ["dark", "light"] as const) {
   test(`sem violações WCAG 2.1 AA (tema ${tema === "dark" ? "escuro" : "claro"})`, async ({ page }) => {
     await entrarDemo(page);
     await page.evaluate((t) => localStorage.setItem("theme", t), tema);
-    for (const tela of [...TELAS, "/entrar"]) {
+    for (const tela of [...TELAS, "/entrar", "/privacidade", "/termos"]) {
       await page.goto(tela);
       await page.waitForTimeout(700);
       // o axe traz o próprio tipo de Page (outra versão do playwright-core)
@@ -60,3 +60,11 @@ for (const largura of [360, 768, 1440]) {
     }
   });
 }
+
+test("páginas legais abertas sem login, com direitos e contato", async ({ page }) => {
+  await page.goto("/privacidade");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Política de privacidade");
+  await expect(page.getByText(/Configurações → Excluir minha conta/).first()).toBeVisible();
+  await page.getByRole("link", { name: "Termos de uso" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Termos de uso");
+});

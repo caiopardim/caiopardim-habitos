@@ -33,6 +33,11 @@ jobs:
         run: npm run test:coverage
       - name: Build
         run: npm run build
+      - name: Nenhum segredo no código do navegador
+        run: |
+          if grep -rlE "SUPABASE_SERVICE_ROLE|VAPID_PRIVATE|CRON_SECRET|service_role" .next/static; then
+            echo "::error::Segredo encontrado no bundle do navegador"; exit 1
+          fi
       - name: Navegador para os testes de ponta a ponta
         run: npx playwright install --with-deps chromium
       - name: Testes de ponta a ponta (Playwright)

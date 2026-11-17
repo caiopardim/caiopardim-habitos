@@ -1,7 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/entrar", "/cadastro", "/recuperar-senha", "/auth", "/demo", "/offline"];
+const PUBLIC_PATHS = [
+  "/entrar",
+  "/cadastro",
+  "/recuperar-senha",
+  "/auth",
+  "/demo",
+  "/offline",
+  "/privacidade",
+  "/termos",
+];
 const DEMO_COOKIE = "zoryka_demo";
 
 /** Renova a sessão do Supabase e protege as rotas do app. */
