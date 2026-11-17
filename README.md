@@ -88,6 +88,30 @@ dia (`notification_log`). No iPhone, push só funciona com o app instalado na te
 `supabase/tests/rls_smoke.sql` testa a RLS num Postgres local (dois usuários, um tentando ler/gravar dados do
 outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depois de `stub_supabase.sql` e das migrations.
 
+## Testes e CI
+
+| Comando                             | O que testa                                                                                                                                                                                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`                          | regras de negócio e dados (Vitest)                                                                                                                                                            |
+| `npm run test:coverage`             | idem, com cobertura — o CI falha se `lib/domain` ficar abaixo de 95% das linhas                                                                                                               |
+| `npm run build && npm run test:e2e` | ponta a ponta no navegador (Playwright): onboarding, check-in, desfazer, criar hábito, Evolução, celebrações, exportar/apagar, offline, push e acessibilidade (axe, alvos de toque, larguras) |
+
+`.github/workflows/ci.yml` roda formatação, lint, tipos, testes com cobertura, build e ponta a ponta em todo push
+e pull request.
+
+### Ambientes
+
+| Ambiente          | Onde                                         | Supabase                                                                    |
+| ----------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+| Desenvolvimento   | `npm run dev`                                | projeto de dev (ou modo local, sem Supabase)                                |
+| Staging / preview | deploy de preview da Vercel (cada branch/PR) | projeto **separado** de staging — variáveis no ambiente _Preview_ da Vercel |
+| Produção          | Vercel, branch `main`                        | projeto de produção — variáveis no ambiente _Production_                    |
+
+**Deploy só com o CI verde:** a integração Git da Vercel publica a cada push. Para publicar a produção só depois
+dos testes, desligue o deploy automático da `main` na Vercel (_Settings → Git → Ignored Build Step_ ou
+`"git": { "deploymentEnabled": { "main": false } }` num `vercel.json`) e configure os segredos `VERCEL_TOKEN`,
+`VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` no GitHub — o job `deploy` do CI publica depois que tudo passa.
+
 ## Arquitetura
 
 ```

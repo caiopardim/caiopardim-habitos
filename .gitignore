@@ -42,3 +42,8 @@ next-env.d.ts
 
 !.env.example
 supabase/.temp
+
+# testes de ponta a ponta
+/test-results/
+/playwright-report/
+/blob-report/
