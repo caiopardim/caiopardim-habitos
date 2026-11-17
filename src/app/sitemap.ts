@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/config";
+
+export const dynamic = "force-static";
 import { CHANGELOG } from "@/lib/changelog";
 
 export default function sitemap(): MetadataRoute.Sitemap {

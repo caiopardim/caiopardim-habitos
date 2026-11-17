@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/config";
 
+export const dynamic = "force-static";
+
 /** Buscadores indexam só as páginas públicas; as telas do app são pessoais. */
 export default function robots(): MetadataRoute.Robots {
   return {
