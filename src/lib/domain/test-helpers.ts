@@ -17,6 +17,7 @@ export function habit(over: Partial<Habit> = {}): Habit {
     diasSemana: [],
     dificuldade: "media",
     horario: null,
+    lembrete: false,
     inicio: "2026-01-01",
     arquivado: false,
     arquivadoEm: null,

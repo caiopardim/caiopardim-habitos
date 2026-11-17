@@ -8,6 +8,7 @@ import { EvolutionAvatar } from "@/components/avatar/evolution-avatar";
 import { useAvatar } from "@/components/avatar/use-avatar";
 import { useReadyData } from "@/components/providers/app-data";
 import { EmptyState } from "@/components/layout/empty-state";
+import { EngagementCard } from "@/components/pwa/engagement-card";
 import { AddFab } from "@/components/today/add-fab";
 import { AreasCard } from "@/components/today/areas-card";
 import { AvoidItem } from "@/components/today/avoid-item";
@@ -253,6 +254,7 @@ export default function HojePage() {
         isToday={isToday}
       />
       {isToday && <SeasonCard season={seasons.atual} />}
+      {isToday && <EngagementCard />}
       {isToday && isReviewDay(today) && (
         <Link
           href="/evolucao#revisao"

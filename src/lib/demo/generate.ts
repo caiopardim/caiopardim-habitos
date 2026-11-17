@@ -1,6 +1,14 @@
 import { addDays, eachDay } from "../domain/dates";
 import { isHabitScheduled } from "../domain/day";
-import type { DateStr, Habit, HabitLog, LifeArea, Profile, Task } from "../domain/types";
+import {
+  DEFAULT_NOTIFICATION_PREFS,
+  type DateStr,
+  type Habit,
+  type HabitLog,
+  type LifeArea,
+  type Profile,
+  type Task,
+} from "../domain/types";
 import { AREAS, BAD_HABIT_TEMPLATES, GOOD_HABIT_TEMPLATES } from "../templates";
 import type { Snapshot } from "../data/types";
 
@@ -58,6 +66,7 @@ export function generateDemoData(opts: {
       diasSemana: k === "treinar" ? [1, 2, 3, 4, 5] : [],
       dificuldade: t.dificuldade,
       horario: t.horario,
+      lembrete: false,
       inicio: start,
       arquivado: false,
       arquivadoEm: null,
@@ -80,6 +89,7 @@ export function generateDemoData(opts: {
       diasSemana: [],
       dificuldade: "media",
       horario: null,
+      lembrete: false,
       inicio: start,
       arquivado: false,
       arquivadoEm: null,
@@ -187,6 +197,7 @@ export function generateDemoData(opts: {
     onboardingConcluido: true,
     objetivo: "equilibrio",
     lembreteHorario: "21:00",
+    notificacoes: { ...DEFAULT_NOTIFICATION_PREFS },
     criadoEm: `${start}T12:00:00Z`,
   };
 

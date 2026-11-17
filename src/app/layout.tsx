@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
+import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { ThemeColorSync } from "@/components/providers/theme-color-sync";
 import { Toaster } from "@/components/ui/sonner";
+import { IOS_SPLASH } from "@/lib/splash";
 import { THEME_COLOR_BOOTSTRAP, THEME_COLORS } from "@/lib/theme-color";
 import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/config";
 import "./globals.css";
@@ -10,7 +12,12 @@ export const metadata: Metadata = {
   title: { default: `${APP_NAME} · ${APP_TAGLINE}`, template: `%s · ${APP_NAME}` },
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
-  appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "black-translucent" },
+  appleWebApp: {
+    capable: true,
+    title: APP_NAME,
+    statusBarStyle: "black-translucent",
+    startupImage: IOS_SPLASH,
+  },
 };
 
 export const viewport: Viewport = {
@@ -30,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           {children}
           <ThemeColorSync />
+          <ServiceWorkerRegister />
           <Toaster />
         </ThemeProvider>
       </body>

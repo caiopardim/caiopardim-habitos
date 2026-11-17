@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { authErrorMessage } from "@/components/auth/auth-messages";
 import { emailSchema, passwordSchema } from "@/components/auth/schemas";
 import { PageHeader } from "@/components/layout/page-header";
+import { InstallSettings } from "@/components/settings/install-settings";
+import { RemindersSettings } from "@/components/settings/reminders-settings";
 import { useReadyData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,6 +123,14 @@ export default function ConfiguracoesPage() {
             className="h-11 w-full accent-[var(--primary)]"
           />
         </Field>
+      </Secao>
+
+      <Secao titulo="Lembretes">
+        <RemindersSettings />
+      </Secao>
+
+      <Secao titulo="App">
+        <InstallSettings />
       </Secao>
 
       {conta && (

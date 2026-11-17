@@ -14,7 +14,7 @@ import { NAV_ITEMS } from "./nav-items";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { repoKind } = useAppData();
+  const { repoKind, sync } = useAppData();
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
@@ -51,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-w-0 flex-1">
-        <OfflineBanner ativo={repoKind === "supabase"} />
+        <OfflineBanner sync={sync} />
         <div className="md:hidden">
           <ModeBadge kind={repoKind} />
         </div>

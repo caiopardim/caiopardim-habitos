@@ -6,6 +6,7 @@ import { DEFAULT_TIMEZONE, isSupabaseConfigured } from "@/lib/config";
 import { hasMeaningfulData, remapForImport } from "@/lib/data/import";
 import { persistResilient } from "@/lib/data/sync";
 import { clearLocalSnapshot, LocalRepository, readLocalSnapshot } from "@/lib/data/local-repository";
+import { OfflineFirstRepository, type SyncStatus } from "@/lib/data/offline-repository";
 import { SupabaseRepository } from "@/lib/data/supabase-repository";
 import type { RepoKind, Repository, Snapshot } from "@/lib/data/types";
 import { generateDemoData } from "@/lib/demo/generate";
@@ -30,6 +31,8 @@ type Status = "loading" | "ready" | "error";
 
 interface AppData {
   status: Status;
+  /** Fila de sincronização da conta (null nos modos local e demonstração). */
+  sync: SyncStatus | null;
   repoKind: RepoKind | null;
   snapshot: Snapshot | null;
   today: DateStr;
@@ -81,12 +84,14 @@ const IMPORT_DISMISSED_KEY = "zoryka:importacao-recusada";
 async function createRepository(): Promise<Repository | null> {
   if (isSupabaseConfigured) {
     const sb = createClient();
+    // Sessão salva no aparelho: funciona sem internet (a RLS no banco continua garantindo o acesso).
     const {
-      data: { user },
-    } = await sb.auth.getUser();
+      data: { session },
+    } = await sb.auth.getSession();
+    const user = session?.user;
     if (user) {
       if (isDemoActive()) exitDemo(); // entrou na conta: sai da demonstração
-      return new SupabaseRepository(sb, user.id);
+      return new OfflineFirstRepository(new SupabaseRepository(sb, user.id), user.id);
     }
   }
   if (isDemoActive()) {
@@ -112,6 +117,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const repoRef = useRef<Repository | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [localImport, setLocalImport] = useState<Snapshot | null>(null);
+  const [sync, setSync] = useState<SyncStatus | null>(null);
 
   const reload = useCallback(async () => {
     try {
@@ -184,6 +190,35 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
   const logFor = useCallback((habitId: string, date: DateStr) => logsIdx.get(date)?.get(habitId), [logsIdx]);
   const canEdit = useCallback((date: DateStr) => canEditDate(date, today), [today]);
+
+  // ── Offline: acompanha a fila, envia quando a conexão volta, guarda o estado no aparelho ──
+  const offline =
+    status === "ready" && repoRef.current instanceof OfflineFirstRepository ? repoRef.current : null;
+  useEffect(() => {
+    if (!offline) return;
+    setSync(offline.status());
+    const unsub = offline.subscribe((s) => {
+      setSync(s);
+      if (s.erro && offline.takeError()) {
+        toast.error("Uma alteração foi recusada pelo servidor e foi desfeita.");
+        void reload();
+      }
+    });
+    const tentar = () => void offline.flush().catch(() => undefined);
+    window.addEventListener("online", tentar);
+    const t = setInterval(() => offline.status().pendentes && tentar(), 30_000);
+    return () => {
+      unsub();
+      window.removeEventListener("online", tentar);
+      clearInterval(t);
+    };
+  }, [offline, reload]);
+
+  useEffect(() => {
+    if (!offline || !snapshot) return;
+    const t = setTimeout(() => offline.remember(snapshot), 400);
+    return () => clearTimeout(t);
+  }, [offline, snapshot]);
 
   // ── Persistência dos resumos diários e do XP (Supabase) ────────────────
   const savedRef = useRef<Map<DateStr, string> | null>(null);
@@ -273,6 +308,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const value: AppData = {
     status,
     repoKind: repoRef.current?.kind ?? null,
+    sync,
     snapshot,
     today,
     history,

@@ -15,7 +15,9 @@ import {
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Label } from "@/components/ui/label";
 import { Segmented } from "@/components/ui/segmented";
+import { Switch } from "@/components/ui/switch";
 import { XP_POR_DIFICULDADE } from "@/lib/domain/day";
 import type { Dificuldade, Habit } from "@/lib/domain/types";
 import { habitFormSchema } from "@/lib/schemas";
@@ -46,7 +48,7 @@ export function HabitFormDialog({
 }
 
 function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onDone: () => void }) {
-  const { snapshot, saveHabit, today } = useAppData();
+  const { snapshot, saveHabit, today, repoKind } = useAppData();
   const areas = snapshot?.areas ?? [];
   const [v, setV] = useState(habit);
   const [metaTexto, setMetaTexto] = useState(
@@ -79,7 +81,12 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
       return;
     }
     const area = areas.find((a) => a.id === parsed.data.areaId);
-    await saveHabit({ ...v, ...parsed.data, cor: bom ? (area?.cor ?? v.cor) : v.cor });
+    await saveHabit({
+      ...v,
+      ...parsed.data,
+      lembrete: v.lembrete && !!parsed.data.horario,
+      cor: bom ? (area?.cor ?? v.cor) : v.cor,
+    });
     toast.success(isNew ? "Hábito criado!" : "Hábito atualizado.");
     onDone();
   }
@@ -252,6 +259,17 @@ function HabitForm({ habit, isNew, onDone }: { habit: Habit; isNew: boolean; onD
               onChange={(e) => set("horario", e.target.value || null)}
             />
           </Field>
+          {repoKind === "supabase" && v.horario && (
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="lembrete" className="flex-col items-start gap-0.5">
+                <span>Me lembrar às {v.horario}</span>
+                <span className="text-muted-foreground text-xs font-normal">
+                  Só se ainda não tiver feito. Ative as notificações em Configurações.
+                </span>
+              </Label>
+              <Switch id="lembrete" checked={v.lembrete} onCheckedChange={(c) => set("lembrete", c)} />
+            </div>
+          )}
         </>
       ) : (
         <Field

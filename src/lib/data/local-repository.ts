@@ -1,5 +1,5 @@
 import { DEFAULT_STREAK_THRESHOLD, DEFAULT_TIMEZONE } from "../config";
-import type { Profile } from "../domain/types";
+import { DEFAULT_NOTIFICATION_PREFS, type Profile } from "../domain/types";
 import type { Repository, Snapshot } from "./types";
 
 /** Dados do usuário no modo local (sem Supabase). Podem ser importados para uma conta. */
@@ -20,6 +20,7 @@ export function emptyProfile(): Profile {
     onboardingConcluido: false,
     objetivo: null,
     lembreteHorario: null,
+    notificacoes: { ...DEFAULT_NOTIFICATION_PREFS },
     criadoEm: new Date().toISOString(),
   };
 }
@@ -32,9 +33,13 @@ export function emptySnapshot(): Snapshot {
 export function normalizeSnapshot(raw: Partial<Snapshot>): Snapshot {
   const base = emptySnapshot();
   return {
-    profile: { ...base.profile, ...(raw.profile ?? {}) },
+    profile: {
+      ...base.profile,
+      ...(raw.profile ?? {}),
+      notificacoes: { ...base.profile.notificacoes, ...(raw.profile?.notificacoes ?? {}) },
+    },
     areas: raw.areas ?? [],
-    habits: raw.habits ?? [],
+    habits: (raw.habits ?? []).map((h) => ({ ...h, lembrete: h.lembrete ?? false })),
     tasks: raw.tasks ?? [],
     logs: raw.logs ?? [],
     restDays: raw.restDays ?? [],

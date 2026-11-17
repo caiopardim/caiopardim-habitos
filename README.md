@@ -54,13 +54,36 @@ Ao criar uma conta num navegador que tem dados do modo local, o app oferece **im
 1. Crie um projeto em [supabase.com](https://supabase.com).
 2. No **SQL Editor**, rode em ordem os arquivos de `supabase/migrations/` (ou `supabase db push` com a CLI):
    - `20261116000000_schema_inicial.sql` — tabelas, RLS e trigger que cria o perfil no cadastro;
-   - `20261117000000_conta_e_onboarding.sql` — objetivo/lembrete no perfil e `delete_my_account()` (exclusão de conta).
+   - `20261117000000_conta_e_onboarding.sql` — objetivo/lembrete no perfil e `delete_my_account()` (exclusão de conta);
+   - `20261118000000_lembretes.sql` — preferências de notificação, aparelhos inscritos e registro de envios.
 3. Em **Project Settings → API**, copie a URL e a `anon key` para o `.env.local`.
 4. **Authentication → URL Configuration**: adicione `http://localhost:3000/auth/callback` (e a URL da Vercel)
    em _Redirect URLs_.
 5. **Login com Google** (opcional): _Authentication → Providers → Google_, com Client ID/Secret do Google Cloud.
 6. **Dados de exemplo** (opcional): preencha `SUPABASE_SERVICE_ROLE_KEY`, `SEED_USER_EMAIL` e
    `SEED_USER_PASSWORD` no `.env.local` e rode `npm run seed`. A service role key só é usada por esse script.
+
+### Lembretes (notificações push)
+
+1. Gere as chaves: `npx web-push generate-vapid-keys` e preencha `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
+   `VAPID_PRIVATE_KEY` e `VAPID_SUBJECT` (na Vercel/Netlify e no `.env.local`).
+2. Defina `CRON_SECRET` (texto aleatório) e `SUPABASE_SERVICE_ROLE_KEY` no servidor.
+3. Agende `GET /api/cron/lembretes` a cada 15 minutos com `Authorization: Bearer <CRON_SECRET>`:
+   - **Supabase (funciona no plano grátis):** edite e rode `supabase/cron_lembretes.sql` (pg_cron + pg_net);
+   - **ou Vercel Pro:** crie um `vercel.json` com `"crons": [{ "path": "/api/cron/lembretes", "schedule": "*/15 * * * *" }]`
+     (no plano Hobby a Vercel só aceita cron diário e o deploy falha).
+4. No app: Configurações → Lembretes → "Receber neste aparelho" → "Enviar teste".
+
+O que é enviado: fechar o dia (no horário escolhido, se faltar algo), por hábito (no horário sugerido, se ainda não
+foi feito) e sequência em risco (20h). Respeita horário silencioso, máximo por dia e nunca repete o mesmo aviso no
+dia (`notification_log`). No iPhone, push só funciona com o app instalado na tela de início (iOS 16.4+).
+
+### Offline (PWA)
+
+- `public/sw.js` guarda as telas e os arquivos do app (abre e navega sem internet) e recebe os pushes.
+- Com conta, o último estado fica no aparelho e as marcações entram numa **fila persistente**
+  (`src/lib/data/offline-repository.ts`): sobrevivem a fechar o app e são enviadas quando a conexão volta.
+- Ícones, `apple-touch-icon`, telas de abertura do iOS (`public/splash/`) e convite de instalação próprio.
 
 `supabase/tests/rls_smoke.sql` testa a RLS num Postgres local (dois usuários, um tentando ler/gravar dados do
 outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depois de `stub_supabase.sql` e das migrations.
@@ -109,7 +132,7 @@ supabase/migrations/  schema versionado com RLS
 - [x] **Fase 1** — Auth, onboarding, CRUD de hábitos/tarefas, tela Hoje, regras com testes
 - [x] **Fase 2** — Evolução: filtros, gráficos, por hábito com heatmap, insights automáticos e revisão semanal
 - [ ] **Fase 3** — Gamificação (temporadas, conquistas, perfil)
-- [ ] **Fase 4** — PWA, offline, lembretes, exportar CSV, excluir conta
+- [x] **Fase 4** — PWA, offline com fila de sincronização, lembretes por push, exportar CSV, excluir conta
 - [ ] **Fase 5** — Monetização
 
 > A Zoryka não substitui acompanhamento profissional de saúde.

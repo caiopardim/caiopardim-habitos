@@ -18,10 +18,34 @@ export interface Profile {
   onboardingConcluido: boolean;
   /** Objetivo principal escolhido no onboarding (chave de OBJETIVOS). */
   objetivo: string | null;
-  /** Horário "HH:mm" para fechar o dia (lembretes, Bloco 5.3). */
+  /** Horário "HH:mm" do lembrete de fechar o dia. */
   lembreteHorario: string | null;
+  notificacoes: NotificationPrefs;
   criadoEm: string;
 }
+
+export interface NotificationPrefs {
+  /** Lembrete de fechar o dia (no horário lembreteHorario). */
+  fechamento: boolean;
+  /** Lembretes por hábito (nos hábitos com lembrete ligado). */
+  habitos: boolean;
+  /** Aviso de sequência em risco (à noite). */
+  sequencia: boolean;
+  /** Horário silencioso "HH:mm" (pode atravessar a meia-noite). */
+  silencioInicio: string;
+  silencioFim: string;
+  /** Máximo de notificações por dia. */
+  maxPorDia: number;
+}
+
+export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
+  fechamento: true,
+  habitos: true,
+  sequencia: true,
+  silencioInicio: "22:30",
+  silencioFim: "07:00",
+  maxPorDia: 3,
+};
 
 export interface LifeArea {
   id: string;
@@ -45,6 +69,8 @@ export interface Habit {
   diasSemana: number[];
   dificuldade: Dificuldade;
   horario: string | null;
+  /** Lembrar no horário sugerido (push). */
+  lembrete: boolean;
   /** Primeiro dia em que o hábito vale (bons: criação; maus: início do controle). */
   inicio: DateStr;
   arquivado: boolean;

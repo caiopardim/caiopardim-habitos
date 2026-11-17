@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/entrar", "/cadastro", "/recuperar-senha", "/auth", "/demo"];
+const PUBLIC_PATHS = ["/entrar", "/cadastro", "/recuperar-senha", "/auth", "/demo", "/offline"];
 const DEMO_COOKIE = "zoryka_demo";
 
 /** Renova a sessão do Supabase e protege as rotas do app. */
@@ -49,6 +49,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons/|splash/|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

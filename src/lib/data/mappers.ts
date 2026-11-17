@@ -1,5 +1,13 @@
 import { z } from "zod";
-import type { DaySummary, Habit, HabitLog, LifeArea, Profile, Task } from "../domain/types";
+import {
+  DEFAULT_NOTIFICATION_PREFS,
+  type DaySummary,
+  type Habit,
+  type HabitLog,
+  type LifeArea,
+  type Profile,
+  type Task,
+} from "../domain/types";
 
 /** Converte linhas do Postgres (snake_case) ⇄ objetos de domínio (camelCase), validando com Zod. */
 
@@ -20,6 +28,12 @@ export const profileRow = z
     onboarding_concluido: z.boolean(),
     objetivo: z.string().nullable().optional(),
     lembrete_horario: z.string().nullable().optional(),
+    notif_fechamento: z.boolean().optional(),
+    notif_habitos: z.boolean().optional(),
+    notif_sequencia: z.boolean().optional(),
+    silencio_inicio: z.string().nullable().optional(),
+    silencio_fim: z.string().nullable().optional(),
+    notif_max_dia: num.optional(),
     criado_em: z.string(),
   })
   .transform((r): Profile => ({
@@ -32,6 +46,14 @@ export const profileRow = z
     onboardingConcluido: r.onboarding_concluido,
     objetivo: r.objetivo ?? null,
     lembreteHorario: r.lembrete_horario ? r.lembrete_horario.slice(0, 5) : null,
+    notificacoes: {
+      fechamento: r.notif_fechamento ?? DEFAULT_NOTIFICATION_PREFS.fechamento,
+      habitos: r.notif_habitos ?? DEFAULT_NOTIFICATION_PREFS.habitos,
+      sequencia: r.notif_sequencia ?? DEFAULT_NOTIFICATION_PREFS.sequencia,
+      silencioInicio: r.silencio_inicio?.slice(0, 5) ?? DEFAULT_NOTIFICATION_PREFS.silencioInicio,
+      silencioFim: r.silencio_fim?.slice(0, 5) ?? DEFAULT_NOTIFICATION_PREFS.silencioFim,
+      maxPorDia: r.notif_max_dia ?? DEFAULT_NOTIFICATION_PREFS.maxPorDia,
+    },
     criadoEm: r.criado_em,
   }));
 
@@ -53,6 +75,7 @@ export const habitRow = z
     dias_semana: z.array(num),
     dificuldade,
     horario: z.string().nullable(),
+    lembrete: z.boolean().optional(),
     inicio: z.string(),
     arquivado: z.boolean(),
     arquivado_em: z.string().nullable(),
@@ -71,6 +94,7 @@ export const habitRow = z
     diasSemana: r.dias_semana,
     dificuldade: r.dificuldade,
     horario: r.horario ? r.horario.slice(0, 5) : null,
+    lembrete: r.lembrete ?? false,
     inicio: r.inicio,
     arquivado: r.arquivado,
     arquivadoEm: r.arquivado_em,
@@ -127,6 +151,15 @@ export function profileToRow(p: Partial<Omit<Profile, "id" | "criadoEm">>) {
   if (p.onboardingConcluido !== undefined) row.onboarding_concluido = p.onboardingConcluido;
   if (p.objetivo !== undefined) row.objetivo = p.objetivo;
   if (p.lembreteHorario !== undefined) row.lembrete_horario = p.lembreteHorario;
+  if (p.notificacoes !== undefined) {
+    const n = p.notificacoes;
+    row.notif_fechamento = n.fechamento;
+    row.notif_habitos = n.habitos;
+    row.notif_sequencia = n.sequencia;
+    row.silencio_inicio = n.silencioInicio;
+    row.silencio_fim = n.silencioFim;
+    row.notif_max_dia = n.maxPorDia;
+  }
   return row;
 }
 
@@ -153,6 +186,7 @@ export const habitToRow = (h: Habit, userId: string) => ({
   dias_semana: h.diasSemana,
   dificuldade: h.dificuldade,
   horario: h.horario,
+  lembrete: h.lembrete,
   inicio: h.inicio,
   arquivado: h.arquivado,
   arquivado_em: h.arquivadoEm,
