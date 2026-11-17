@@ -33,7 +33,11 @@ export function AvatarCard() {
               <span>Próxima evolução: {a.proximo.nome}</span>
               <span>Nível {a.proximo.nivelMin}</span>
             </div>
-            <Progress value={a.progressoProximo * 100} aria-label={`Progresso até ${a.proximo.nome}`} />
+            <Progress
+              value={a.progressoProximo * 100}
+              indicatorClassName="bg-brand-gradient"
+              aria-label={`Progresso até ${a.proximo.nome}`}
+            />
           </>
         ) : (
           <p className="text-xp text-center text-sm font-semibold">Evolução máxima alcançada! 👑</p>

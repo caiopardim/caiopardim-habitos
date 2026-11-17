@@ -1,6 +1,8 @@
 /** Nome do produto — troque aqui para renomear o app inteiro. */
-export const APP_NAME = "HabitOS";
-export const APP_DESCRIPTION = "Acompanhe hábitos, evite o que te atrapalha e veja sua evolução em dados.";
+export const APP_NAME = "Zoryka";
+export const APP_TAGLINE = "sua evolução, um dia de cada vez";
+export const APP_DESCRIPTION =
+  "Sua evolução, um dia de cada vez: acompanhe hábitos, evite o que te atrapalha e veja seu progresso em dados.";
 
 export const DEFAULT_TIMEZONE = "America/Sao_Paulo";
 /** Execução mínima (0–1) para um dia contar na sequência. */

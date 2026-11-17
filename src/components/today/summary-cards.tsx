@@ -75,6 +75,7 @@ export function SummaryCards({
       >
         <Progress
           value={level.progresso * 100}
+          indicatorClassName="bg-brand-gradient"
           className="mt-1.5 h-1.5"
           aria-label={`Progresso do nível ${level.nivel}`}
         />

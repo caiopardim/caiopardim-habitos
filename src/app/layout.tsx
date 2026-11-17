@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
-import { APP_DESCRIPTION, APP_NAME } from "@/lib/config";
+import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/config";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
+  title: { default: `${APP_NAME} · ${APP_TAGLINE}`, template: `%s · ${APP_NAME}` },
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
   appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "black-translucent" },
@@ -16,8 +16,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#121418" },
-    { media: "(prefers-color-scheme: light)", color: "#f8f9fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#14110f" },
+    { media: "(prefers-color-scheme: light)", color: "#f7efe6" },
   ],
 };
 

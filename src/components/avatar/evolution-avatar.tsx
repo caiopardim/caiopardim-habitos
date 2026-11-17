@@ -4,11 +4,13 @@ import { useId } from "react";
 import type { Energia } from "@/lib/domain/avatar";
 import { cn } from "@/lib/utils";
 
-/** Cor do corpo por estágio: começa apagado e fica cada vez mais vivo. */
-const BODY = ["#b9c7a5", "#a9d67e", "#97d35a", "#84cc3f", "#70c032", "#5db22c", "#8fd14f"];
-const SHADE = ["#8e9c7b", "#7fae55", "#6fac36", "#5fa323", "#4f961c", "#3f8818", "#5fa323"];
-const INK = "#1d2416";
-const GOLD = "#f5c542";
+/** Cor do corpo por estágio (paleta da marca): começa areia apagada e vira sol. */
+const BODY = ["#e6d6c3", "#f3d9a4", "#f8ce7a", "#ffc247", "#ffb347", "#ff9f45", "#ffc247"];
+const SHADE = ["#c7b29b", "#dcb878", "#e8b04f", "#eaa42c", "#e8952d", "#e5822c", "#e8a42a"];
+const INK = "#1e1a17";
+const GOLD = "#ffd166";
+const PINK = "#e8546f";
+const ORANGE = "#ff8a3d";
 
 /**
  * Avatar de evolução: um personagem que ganha tamanho, força e acessórios a cada estágio.
@@ -59,8 +61,8 @@ export function EvolutionAvatar({
           <ellipse cx={cx} cy={cy} rx={rx} ry={ry} />
         </clipPath>
         <radialGradient id={`aura-${uid}`}>
-          <stop offset="0%" stopColor={s >= 6 ? GOLD : "#a3e635"} stopOpacity="0.55" />
-          <stop offset="100%" stopColor={s >= 6 ? GOLD : "#a3e635"} stopOpacity="0" />
+          <stop offset="0%" stopColor={s >= 6 ? GOLD : ORANGE} stopOpacity="0.5" />
+          <stop offset="100%" stopColor={s >= 6 ? GOLD : ORANGE} stopOpacity="0" />
         </radialGradient>
       </defs>
 
@@ -76,7 +78,7 @@ export function EvolutionAvatar({
       {s >= 5 && (
         <path
           d={`M ${cx - rx * 0.7} ${cy - ry * 0.35} Q ${cx - rx - 26} ${bottom + 4} ${cx - rx - 14} ${bottom + 10} L ${cx + rx + 14} ${bottom + 10} Q ${cx + rx + 26} ${bottom + 4} ${cx + rx * 0.7} ${cy - ry * 0.35} Z`}
-          fill={locked ? "#4b5563" : "#7c3aed"}
+          fill={locked ? "#4b5563" : "#9b2c4a"}
           stroke={INK}
           strokeWidth={3}
           strokeLinejoin="round"
@@ -185,7 +187,7 @@ export function EvolutionAvatar({
             y={cy - ry * 0.62}
             width={rx * 2 + 4}
             height={10 + s}
-            fill={locked ? "#374151" : "#ef4444"}
+            fill={locked ? "#374151" : PINK}
             stroke={INK}
             strokeWidth={3}
           />
@@ -207,7 +209,7 @@ export function EvolutionAvatar({
         // Pontas da faixa
         <path
           d={`M ${cx + rx - 4} ${cy - ry * 0.55} l 16 -6 l -4 12 Z M ${cx + rx - 4} ${cy - ry * 0.5} l 14 10 l -14 2 Z`}
-          fill={locked ? "#374151" : "#ef4444"}
+          fill={locked ? "#374151" : PINK}
           stroke={INK}
           strokeWidth={2.5}
           strokeLinejoin="round"
@@ -308,7 +310,7 @@ function Face({
           cy={eyeY + 9}
           rx={5}
           ry={3}
-          fill="#f472b6"
+          fill={PINK}
           opacity={0.45}
           stroke="none"
         />

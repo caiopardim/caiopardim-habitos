@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
 import { EvolutionWatcher } from "@/components/avatar/evolution-watcher";
 import { useAppData } from "@/components/providers/app-data";
+import { ZorykaLogo } from "@/components/brand/logo";
 import { APP_NAME } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "./nav-items";
@@ -19,11 +20,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <EvolutionWatcher />
       {/* Barra lateral (desktop) */}
       <aside className="bg-card/40 sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r p-4 md:flex">
-        <Link href="/hoje" className="mb-6 flex items-center gap-2 px-2 text-lg font-bold">
-          <span className="bg-primary text-primary-foreground grid size-8 place-items-center rounded-lg text-sm font-black">
-            {APP_NAME.slice(0, 1)}
-          </span>
-          {APP_NAME}
+        <Link
+          href="/hoje"
+          className="mb-6 flex items-center px-2 py-1 text-base"
+          aria-label={`${APP_NAME} — início`}
+        >
+          <ZorykaLogo />
         </Link>
         <nav className="flex flex-1 flex-col gap-1" aria-label="Principal">
           {[...NAV_ITEMS, { href: "/configuracoes", label: "Configurações", icon: Settings }].map(

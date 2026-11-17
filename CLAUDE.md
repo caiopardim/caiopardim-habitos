@@ -1,7 +1,8 @@
-# HabitOS — contexto do projeto
+# Zoryka — contexto do projeto
 
 App de hábitos (Next.js 15 + Supabase). Especificação completa entregue por fases; ver README (seção Fases).
-Interface **toda em português do Brasil**.
+Interface **toda em português do Brasil**. Slogan: "sua evolução, um dia de cada vez".
+Marca: ver seção "Marca" do README; use os tokens de `globals.css` (nunca cores soltas) e `ZorykaLogo`/`ZorykaMark`.
 
 ## Comandos
 

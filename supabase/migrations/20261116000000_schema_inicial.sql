@@ -1,4 +1,4 @@
--- HabitOS — schema inicial
+-- Zoryka — schema inicial
 -- Todas as tabelas têm RLS: cada usuário só lê e escreve os próprios dados.
 
 -- ─────────────────────────────────────────────────────────────

@@ -1,17 +1,15 @@
-import { APP_NAME } from "@/lib/config";
-import { isSupabaseConfigured } from "@/lib/config";
+import { ZorykaLogo } from "@/components/brand/logo";
+import { APP_NAME, APP_TAGLINE, isSupabaseConfigured } from "@/lib/config";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center gap-8 px-5 py-10">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <div className="bg-primary text-primary-foreground grid size-14 place-items-center rounded-2xl text-2xl font-black">
-          {APP_NAME.slice(0, 1)}
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">{APP_NAME}</h1>
-        <p className="text-muted-foreground text-sm">Um dia ruim é uma queda no gráfico, não um recomeço.</p>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <h1 className="sr-only">{APP_NAME}</h1>
+        <ZorykaLogo className="text-3xl" markClassName="h-11" />
+        <p className="text-muted-foreground text-sm">{APP_TAGLINE}</p>
       </div>
       {isSupabaseConfigured ? (
         children

@@ -1,9 +1,18 @@
-# HabitOS
+# Zoryka
 
-App web (PWA, mobile-first) de hábitos e evolução pessoal: registre o que você faz, o que evita e acompanhe
+**Sua evolução, um dia de cada vez.** App web (PWA, mobile-first) de hábitos e evolução pessoal: registre o que você faz, o que evita e acompanhe
 sua evolução com pontuação, sequência e XP. **Um dia ruim é uma queda no gráfico, não um recomeço do zero.**
 
-> O nome é provisório — troque em `src/lib/config.ts` (`APP_NAME`).
+> Nome e slogan centralizados em `src/lib/config.ts` (`APP_NAME`, `APP_TAGLINE`).
+
+## Marca
+
+- Arquivos de referência em `docs/brand/`. O símbolo (arcos + sol) está em `src/components/brand/logo.tsx`
+  (`ZorykaMark`, `ZorykaLogo`, `ZorykaAppIcon`), e os ícones em `src/app/icon.svg`, `src/app/apple-icon.png`
+  e `public/icons/`.
+- Paleta: rosa `#E8546F`/`#F26D85`, laranja `#F57A2A`/`#FF8A3D`, amarelo `#F5B12E`/`#FFC247`
+  (claro/escuro), creme `#F7EFE6` e preto quente `#14110F`. Tokens em `src/app/globals.css`.
+- Fontes: Sora (títulos e logotipo) e Inter (interface).
 
 ## Stack
 
@@ -94,4 +103,4 @@ supabase/migrations/  schema versionado com RLS
 - [ ] **Fase 4** — PWA, offline, lembretes, exportar CSV, excluir conta
 - [ ] **Fase 5** — Monetização
 
-> O HabitOS não substitui acompanhamento profissional de saúde.
+> A Zoryka não substitui acompanhamento profissional de saúde.

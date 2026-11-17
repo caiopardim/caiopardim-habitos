@@ -2,7 +2,9 @@ import { DEFAULT_STREAK_THRESHOLD, DEFAULT_TIMEZONE } from "../config";
 import type { Profile } from "../domain/types";
 import type { Repository, Snapshot } from "./types";
 
-const KEY = "habitos:demo:v1";
+const KEY = "zoryka:demo:v1";
+/** Chave antiga (antes do nome Zoryka): migrada na primeira leitura. */
+const OLD_KEY = "habitos:demo:v1";
 
 function emptySnapshot(): Snapshot {
   const profile: Profile = {
@@ -25,7 +27,7 @@ export class LocalRepository implements Repository {
 
   private read(): Snapshot {
     try {
-      const raw = window.localStorage.getItem(KEY);
+      const raw = window.localStorage.getItem(KEY) ?? window.localStorage.getItem(OLD_KEY);
       if (raw) this.data = JSON.parse(raw) as Snapshot;
     } catch {
       // armazenamento indisponível (aba anônima etc.): segue só em memória
@@ -129,6 +131,7 @@ export class LocalRepository implements Repository {
   signOut() {
     try {
       window.localStorage.removeItem(KEY);
+      window.localStorage.removeItem(OLD_KEY);
     } catch {
       // idem
     }

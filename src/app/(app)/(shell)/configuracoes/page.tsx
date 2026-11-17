@@ -11,7 +11,6 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Segmented } from "@/components/ui/segmented";
-import { APP_NAME } from "@/lib/config";
 import { timezoneOptions } from "@/lib/timezones";
 
 export default function ConfiguracoesPage() {
@@ -117,7 +116,7 @@ export default function ConfiguracoesPage() {
           <LogOut /> {repoKind === "local" ? "Sair e apagar dados locais" : "Sair"}
         </Button>
         <p className="text-muted-foreground text-center text-xs">
-          Exportar dados (CSV) e excluir conta chegam na Fase 4. O {APP_NAME} não substitui acompanhamento
+          Exportar dados (CSV) e excluir conta chegam na Fase 4. Este app não substitui acompanhamento
           profissional de saúde.
         </p>
       </section>

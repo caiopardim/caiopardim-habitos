@@ -42,7 +42,12 @@ export default function PerfilPage() {
             {level.xpNoNivel} / {level.xpDoNivel} XP
           </p>
         </div>
-        <Progress value={level.progresso * 100} className="mt-3" aria-label="Progresso do nível" />
+        <Progress
+          value={level.progresso * 100}
+          indicatorClassName="bg-brand-gradient"
+          className="mt-3"
+          aria-label="Progresso do nível"
+        />
       </div>
       <div className="grid grid-cols-2 gap-2.5">
         {stats.map((s) => (

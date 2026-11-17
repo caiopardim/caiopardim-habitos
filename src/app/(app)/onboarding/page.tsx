@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
-import { APP_NAME, DEFAULT_TIMEZONE } from "@/lib/config";
+import { DEFAULT_TIMEZONE } from "@/lib/config";
 import { isValidTimeZone, todayInTz } from "@/lib/domain/dates";
 import { areasFromTemplates, habitFromBadTemplate, habitFromGoodTemplate } from "@/lib/habit-factory";
 import { AREAS, BAD_HABIT_TEMPLATES, DIFICULDADE_LABEL, GOOD_HABIT_TEMPLATES } from "@/lib/templates";
@@ -97,7 +97,7 @@ export default function OnboardingPage() {
         {step === 0 && (
           <section className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold">Boas-vindas ao {APP_NAME} 👋</h1>
+              <h1 className="text-2xl font-bold">Boas-vindas! 👋</h1>
               <p className="text-muted-foreground mt-1">
                 Vamos transformar sua rotina em dados para aprender e ajustar — sem perfeccionismo.
               </p>
@@ -225,7 +225,7 @@ export default function OnboardingPage() {
               constância.
             </p>
             <p className="text-muted-foreground mx-auto max-w-sm text-xs">
-              O {APP_NAME} não substitui acompanhamento profissional de saúde.
+              Este app não substitui acompanhamento profissional de saúde.
             </p>
           </section>
         )}
