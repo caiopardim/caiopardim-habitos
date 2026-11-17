@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("onboarding completo até o primeiro check-in", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("link", { name: "Começar grátis" }).first().click();
   await page.waitForURL("**/onboarding");
   const continuar = page.getByRole("button", { name: "Continuar" });
   await expect(continuar).toBeDisabled();

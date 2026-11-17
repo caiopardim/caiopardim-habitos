@@ -18,7 +18,8 @@ export type Evento =
   | "demo_iniciada"
   | "paywall_visto"
   | "checkout_iniciado"
-  | "renovacao_cancelada";
+  | "renovacao_cancelada"
+  | "sugestao_enviada";
 
 export type Consentimento = "aceito" | "recusado" | null;
 

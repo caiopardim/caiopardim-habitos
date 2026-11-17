@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { InstallSettings } from "@/components/settings/install-settings";
 import { PrivacySettings } from "@/components/settings/privacy-settings";
 import { RemindersSettings } from "@/components/settings/reminders-settings";
+import { HelpSettings } from "@/components/support/help-settings";
 import { useReadyData } from "@/components/providers/app-data";
 import { Button } from "@/components/ui/button";
 import {
@@ -158,6 +159,10 @@ export default function ConfiguracoesPage() {
 
       <Secao titulo="App">
         <InstallSettings />
+      </Secao>
+
+      <Secao titulo="Ajuda">
+        <HelpSettings />
       </Secao>
 
       <Secao titulo="Privacidade">

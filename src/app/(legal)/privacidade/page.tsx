@@ -44,6 +44,15 @@ export default function PrivacidadePage() {
           que o navegador gera para recebê-las.
         </li>
         <li>
+          <strong>Sugestões e suporte:</strong> o texto que você envia pelo app (com o tipo e a tela de onde
+          enviou) e as mensagens trocadas por e-mail ou WhatsApp.
+        </li>
+        <li>
+          <strong>Assinatura:</strong> se você assinar um plano pago, o plano, as datas de validade e o
+          histórico de pagamentos (valor, forma e situação). Os dados do cartão ficam com o Mercado Pago; nós
+          não os vemos.
+        </li>
+        <li>
           <strong>Dados técnicos:</strong> registros de acesso (data, hora e IP), exigidos pelo Marco Civil da
           Internet; relatórios de erro sem dados de identificação direta; e, só se você permitir, medições
           anônimas de uso.
@@ -71,6 +80,11 @@ export default function PrivacidadePage() {
         <li>
           Medir o uso para melhorar o app — consentimento, pedido em um aviso e revogável a qualquer momento.
         </li>
+        <li>
+          Responder ao suporte e avaliar sugestões — execução do contrato e legítimo interesse (art. 7º, V e
+          IX).
+        </li>
+        <li>Cobrar planos pagos e emitir comprovantes — execução do contrato (art. 7º, V).</li>
         <li>Guardar registros de acesso — obrigação legal (art. 7º, II; Marco Civil, art. 15).</li>
       </ul>
       <p>
@@ -91,9 +105,8 @@ export default function PrivacidadePage() {
           Serviços de notificação do seu navegador (Google, Apple ou Mozilla) — recebem apenas a notificação
           criptografada;
         </li>
-        <li>
-          Quando houver planos pagos, o processador de pagamento escolhido, só com os dados da cobrança.
-        </li>
+        <li>Mercado Pago — processamento dos pagamentos dos planos, só com os dados da cobrança;</li>
+        <li>Meta (WhatsApp) — só se você escolher falar com o suporte por lá.</li>
       </ul>
       <p>
         Alguns desses fornecedores mantêm servidores fora do Brasil. Nesses casos, a transferência

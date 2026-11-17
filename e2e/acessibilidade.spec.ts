@@ -17,7 +17,7 @@ for (const tema of ["dark", "light"] as const) {
   test(`sem violações WCAG 2.1 AA (tema ${tema === "dark" ? "escuro" : "claro"})`, async ({ page }) => {
     await entrarDemo(page);
     await page.evaluate((t) => localStorage.setItem("theme", t), tema);
-    for (const tela of [...TELAS, "/entrar", "/privacidade", "/termos"]) {
+    for (const tela of [...TELAS, "/entrar", "/privacidade", "/termos", "/suporte", "/novidades"]) {
       await page.goto(tela);
       await page.waitForTimeout(700);
       // o axe traz o próprio tipo de Page (outra versão do playwright-core)

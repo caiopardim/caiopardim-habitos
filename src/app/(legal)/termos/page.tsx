@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BILLING_ENABLED } from "@/lib/config";
+import { DIAS_TESTE, formatBRL, PRECOS } from "@/lib/domain/billing";
 import { LEGAL } from "@/lib/legal";
 
 export const metadata: Metadata = { title: "Termos de uso" };
@@ -56,11 +58,37 @@ export default function TermosPage() {
       </p>
 
       <h2>6. Planos pagos</h2>
-      <p>
-        Se houver planos pagos, preço, período de teste, renovação e cancelamento serão informados com clareza
-        antes da contratação. Você poderá cancelar pelo próprio app, e o direito de arrependimento de 7 dias
-        do Código de Defesa do Consumidor (art. 49) será respeitado.
-      </p>
+      {BILLING_ENABLED ? (
+        <ul>
+          <li>
+            Há um plano grátis, sem prazo, e o Premium: mensal ({formatBRL(PRECOS.mensal)}) ou anual (
+            {formatBRL(PRECOS.anual)}), pagos pelo Mercado Pago com Pix ou cartão. Os preços e o que cada
+            plano inclui ficam na tela Planos antes da contratação.
+          </li>
+          <li>
+            Ao criar a conta, você ganha {DIAS_TESTE} dias de Premium para testar, sem cartão e sem cobrança
+            automática ao final.
+          </li>
+          <li>
+            O mensal no cartão renova sozinho a cada mês até você cancelar em Minha assinatura. O Pix e o
+            anual não renovam: valem pelo período pago.
+          </li>
+          <li>Ao cancelar, não há novas cobranças e o Premium continua até o fim do período já pago.</li>
+          <li>
+            Direito de arrependimento: até 7 dias após o pagamento, você pode pedir o reembolso integral
+            (Código de Defesa do Consumidor, art. 49) pelo e-mail {LEGAL.email}.
+          </li>
+          <li>Se o Premium vencer, nada do que você registrou é apagado: a conta volta ao plano grátis.</li>
+          <li>Mudanças de preço valem só para novas contratações ou renovações, com aviso prévio.</li>
+        </ul>
+      ) : (
+        <p>
+          Hoje todos os recursos são gratuitos. Se houver planos pagos, preço, período de teste, renovação e
+          cancelamento serão informados com clareza antes da contratação, você poderá cancelar pelo próprio
+          app, e o direito de arrependimento de 7 dias (Código de Defesa do Consumidor, art. 49) será
+          respeitado.
+        </p>
+      )}
 
       <h2>7. Disponibilidade</h2>
       <p>

@@ -25,3 +25,6 @@ export const SHOW_ROADMAP = process.env.NEXT_PUBLIC_SHOW_ROADMAP === "true";
  * Ligue com NEXT_PUBLIC_BILLING_ENABLED=true depois de configurar o Mercado Pago.
  */
 export const BILLING_ENABLED = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";
+
+/** Endereço público do app (SEO, cartões de compartilhamento, links do pagamento). */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");

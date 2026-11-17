@@ -7,7 +7,7 @@ import { ThemeColorSync } from "@/components/providers/theme-color-sync";
 import { Toaster } from "@/components/ui/sonner";
 import { IOS_SPLASH } from "@/lib/splash";
 import { THEME_COLOR_BOOTSTRAP, THEME_COLORS } from "@/lib/theme-color";
-import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/config";
+import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE, SITE_URL } from "@/lib/config";
 import "./globals.css";
 
 // Fontes servidas pelo próprio app: só o subconjunto latino (cobre o português), pré-carregadas, com swap.
@@ -25,6 +25,7 @@ const sora = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: `${APP_NAME} · ${APP_TAGLINE}`, template: `%s · ${APP_NAME}` },
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
@@ -34,6 +35,16 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     startupImage: IOS_SPLASH,
   },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: APP_NAME,
+    title: `${APP_NAME} · ${APP_TAGLINE}`,
+    description: APP_DESCRIPTION,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: `${APP_NAME}: ${APP_TAGLINE}` }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {

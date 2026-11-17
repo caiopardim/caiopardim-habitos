@@ -10,6 +10,8 @@ const PUBLIC_PATHS = [
   "/offline",
   "/privacidade",
   "/termos",
+  "/suporte",
+  "/novidades",
 ];
 const DEMO_COOKIE = "zoryka_demo";
 
@@ -37,7 +39,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+  const isPublic = path === "/" || PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
   // Modo demonstração: sem conta, com dados fictícios no navegador.
   const demo = request.cookies.get(DEMO_COOKIE)?.value === "1";
@@ -46,6 +48,12 @@ export async function middleware(request: NextRequest) {
     const to = request.nextUrl.clone();
     to.pathname = "/entrar";
     to.search = "";
+    return NextResponse.redirect(to);
+  }
+  // Página inicial: quem já usa o app vai direto para o Hoje.
+  if ((user || demo) && path === "/") {
+    const to = request.nextUrl.clone();
+    to.pathname = "/hoje";
     return NextResponse.redirect(to);
   }
   if (user && (path === "/entrar" || path === "/cadastro")) {
@@ -58,6 +66,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons/|splash/|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons/|splash/|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm|txt|xml)$).*)",
   ],
 };

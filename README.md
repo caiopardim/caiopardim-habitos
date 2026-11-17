@@ -86,7 +86,8 @@ dia (`notification_log`). No iPhone, push só funciona com o app instalado na te
 - Ícones, `apple-touch-icon`, telas de abertura do iOS (`public/splash/`) e convite de instalação próprio.
 
 `supabase/tests/rls_smoke.sql` testa a RLS num Postgres local (dois usuários, um tentando ler/gravar dados do
-outro) e `supabase/tests/conta_smoke.sql` testa a exclusão de conta. Rode depois de `stub_supabase.sql` e das migrations.
+outro) `supabase/tests/conta_smoke.sql` testa a exclusão de conta, e `assinaturas_smoke.sql` e `sugestoes_smoke.sql`
+testam planos e sugestões. Rode depois de `stub_supabase.sql` e das migrations.
 
 ## Planos e pagamentos (Mercado Pago)
 
@@ -119,6 +120,39 @@ Regras em `src/lib/domain/billing.ts`; webhook em `src/lib/billing/webhook.ts` (
 
 Na **demonstração**, Configurações → "Ver o app como" mostra o app como Premium, Teste ou Grátis (só visual).
 
+## Presença: página inicial, domínio, suporte e novidades
+
+- **Página inicial** (`/`, em `src/app/(site)/page.tsx`): proposta, vídeo e prints reais da demonstração, recursos,
+  preços (mostra os planos só com a cobrança ligada), FAQ e garantia. Quem já tem conta ou está na demonstração
+  vai direto para o Hoje. O app instalado abre em `/hoje`.
+- **Depoimentos:** a seção só aparece quando `src/lib/landing/depoimentos.ts` tiver itens. Use apenas depoimentos
+  reais, com autorização por escrito para nome, foto e texto.
+- **Prints e vídeo:** em `public/landing/`, gravados da demonstração. A imagem de compartilhamento `public/og.png`
+  é gerada por `node scripts/og-image.mjs`.
+- **SEO:** título, descrição, Open Graph e Twitter em `src/app/layout.tsx`; `robots.txt` (só as páginas públicas
+  são indexadas) e `sitemap.xml`. Defina `NEXT_PUBLIC_SITE_URL` com o domínio final.
+- **Suporte** (`/suporte`): e-mail (`NEXT_PUBLIC_CONTATO_EMAIL`), WhatsApp (`NEXT_PUBLIC_SUPORTE_WHATSAPP`) e
+  horário (`NEXT_PUBLIC_SUPORTE_HORARIO`), respostas rápidas e formulário de sugestões.
+- **Sugestões:** Configurações → Ajuda → Enviar sugestão. Aplique `supabase/migrations/20261120000000_sugestoes.sql`
+  e leia as mensagens no Supabase (Table Editor → `sugestoes`). Limite de 5 por pessoa por dia. Sem conta, o app
+  oferece e-mail ou WhatsApp com o texto já preenchido.
+- **Novidades** (`/novidades`): edite `src/lib/changelog.ts` (a mais recente no topo, com `id` novo). Quem ainda
+  não viu ganha o selo "Novo" em Configurações → Ajuda.
+
+### Domínio próprio
+
+1. Registre o domínio (ex.: `zoryka.com.br` no [Registro.br](https://registro.br), ou `zoryka.app`).
+2. Na Vercel: _Project → Settings → Domains_ → adicione `zoryka.com.br` e `www.zoryka.com.br` e crie no seu
+   provedor de DNS os registros que a Vercel mostrar (o HTTPS é automático).
+3. Atualize `NEXT_PUBLIC_SITE_URL=https://zoryka.com.br` e refaça o deploy.
+4. No Supabase: _Authentication → URL Configuration_ → **Site URL** com o domínio novo e, em **Redirect URLs**,
+   `https://zoryka.com.br/auth/callback` (mantenha o endereço antigo até a migração terminar).
+5. Login com Google: adicione o domínio novo às origens e URLs de redirecionamento no Google Cloud.
+6. Mercado Pago: troque a URL do webhook para `https://zoryka.com.br/api/billing/webhook`.
+7. E-mails do Supabase (confirmação, recuperação): configure um SMTP com o seu domínio (ex.: Resend) para não
+   caírem no spam, e crie o `contato@zoryka.com.br`.
+8. Envie o `sitemap.xml` no [Google Search Console](https://search.google.com/search-console).
+
 ## Monitoramento e métricas
 
 - **Erros (Sentry):** defina `NEXT_PUBLIC_SENTRY_DSN` (e, se quiser, `SENTRY_DSN` no servidor). Sem DSN nada é carregado.
@@ -127,7 +161,7 @@ Na **demonstração**, Configurações → "Ver o app como" mostra o app como Pr
   Configurações → Privacidade). Sem gravação de tela, sem captura automática de textos, pessoa identificada só pelo id.
   Eventos: `cadastro`, `onboarding_concluido`, `primeiro_checkin`, `dia_ativo` (1×/dia), `habito_criado`,
   `lembretes_ativados`, `app_instalado`, `dados_exportados`, `conta_excluida`, `demo_iniciada`, `paywall_visto`,
-  `checkout_iniciado`, `renovacao_cancelada`.
+  `checkout_iniciado`, `renovacao_cancelada`, `sugestao_enviada`.
   No PostHog, um _Retention insight_ com `cadastro` → `dia_ativo` mostra D1/D7/D30.
 - **Retenção direto do banco:** `supabase/analytics/retencao.sql` (SQL Editor) dá D1, D7 e D30 por semana de cadastro,
   sem depender de terceiros nem de consentimento (usa só os registros do próprio app).
@@ -220,5 +254,6 @@ supabase/migrations/  schema versionado com RLS
 - [x] **Fase 3** — Gamificação: temporadas, 25 medalhas, celebrações em tela cheia com compartilhamento, evolução do avatar animada
 - [x] **Fase 4** — PWA, offline com fila de sincronização, lembretes por push, exportar CSV, excluir conta
 - [x] **Fase 5** — Planos: grátis, teste de 7 dias e Premium (Mercado Pago: Pix e cartão), paywall e Minha assinatura
+- [x] **Presença** — página inicial, SEO, suporte, novidades e sugestões
 
 > A Zoryka não substitui acompanhamento profissional de saúde.
