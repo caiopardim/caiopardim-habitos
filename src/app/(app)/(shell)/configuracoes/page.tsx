@@ -116,8 +116,7 @@ export default function ConfiguracoesPage() {
           <LogOut /> {repoKind === "local" ? "Sair e apagar dados locais" : "Sair"}
         </Button>
         <p className="text-muted-foreground text-center text-xs">
-          Exportar dados (CSV) e excluir conta chegam na Fase 4. Este app não substitui acompanhamento
-          profissional de saúde.
+          Este app não substitui acompanhamento profissional de saúde.
         </p>
       </section>
     </div>

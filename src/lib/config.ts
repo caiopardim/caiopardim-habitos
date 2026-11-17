@@ -13,3 +13,9 @@ export const EDIT_WINDOW_DAYS = 7;
 export const isSupabaseConfigured = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 );
+
+/**
+ * Mostra blocos de "em breve" (recursos de fases futuras). Desligado por padrão:
+ * em produção, recurso que não existe não aparece. Ligue com NEXT_PUBLIC_SHOW_ROADMAP=true no .env.local.
+ */
+export const SHOW_ROADMAP = process.env.NEXT_PUBLIC_SHOW_ROADMAP === "true";

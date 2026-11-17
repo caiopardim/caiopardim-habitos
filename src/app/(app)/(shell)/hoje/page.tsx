@@ -15,9 +15,12 @@ import { TaskFormDialog } from "@/components/today/task-form-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hourInTz } from "@/lib/domain/dates";
+import { badHabitStats } from "@/lib/domain/bad-habits";
+import { dayStatusMessage } from "@/lib/domain/day-status";
 import { habitProgress, isHabitScheduled } from "@/lib/domain/day";
+import { toast } from "sonner";
 import { canUseRestDay, validRestDays } from "@/lib/domain/streak";
-import type { DateStr, HabitLog, Task } from "@/lib/domain/types";
+import type { DateStr, Habit, HabitLog, Task } from "@/lib/domain/types";
 import { formatLongDate, greeting } from "@/lib/format-date";
 
 type Filtro = "todas" | "pendentes" | "concluidas";
@@ -61,6 +64,32 @@ export default function HojePage() {
   const pendentes =
     bons.filter((h) => habitProgress(h, logFor(h.id, date)) < 1).length +
     tarefas.filter((t) => !t.concluida).length;
+
+  const mausSemRegistro = maus.filter((h) => !logFor(h.id, date)).length;
+  const statusDia = dayStatusMessage({ summary, missoesPendentes: pendentes, mausSemRegistro });
+
+  /** Registra Evitei/Aconteceu com toast de "Desfazer" (8 s). Tocar de novo no mesmo botão limpa. */
+  const registrarMau = (h: Habit, st: "evitei" | "aconteceu" | null) => {
+    const anterior = logFor(h.id, date)?.status;
+    const voltar = anterior === "evitei" || anterior === "aconteceu" ? anterior : null;
+    const recordeAntes = badHabitStats(h, logsByHabit.get(h.id) ?? [], date).recorde;
+    data.setBadStatus(h, date, st);
+    if (st === null) return;
+    const opts = {
+      duration: 8000,
+      action: { label: "Desfazer", onClick: () => data.setBadStatus(h, date, voltar) },
+    };
+    if (st === "aconteceu") {
+      toast(
+        recordeAntes > 0
+          ? `Tudo bem. Um dia não apaga o caminho — seu recorde de ${recordeAntes} ${recordeAntes === 1 ? "dia" : "dias"} continua seu.`
+          : "Tudo bem. Um dia não apaga o caminho — amanhã é uma nova chance.",
+        opts,
+      );
+    } else {
+      toast.success(`Mais um dia sem ${h.nome.toLowerCase()}. +10 XP`, opts);
+    }
+  };
 
   const descansoAtivo = validRestDays(snapshot.restDays).has(date);
   const podeDescansar =
@@ -132,13 +161,15 @@ export default function HojePage() {
       )}
 
       <section aria-labelledby="missoes" className="space-y-3">
-        <div className="flex items-baseline justify-between">
+        <div>
           <h2 id="missoes" className="text-lg font-bold">
             Missões {date === today ? "de hoje" : "do dia"}
           </h2>
-          <span className="text-muted-foreground text-xs">
-            {pendentes === 0 ? "Tudo feito 🎉" : `${pendentes} pendente${pendentes > 1 ? "s" : ""}`}
-          </span>
+          {statusDia && (
+            <p className="text-muted-foreground text-sm" aria-live="polite">
+              {statusDia}
+            </p>
+          )}
         </div>
         <Tabs value={filtro} onValueChange={(v) => setFiltro(v as Filtro)}>
           <TabsList>
@@ -198,7 +229,7 @@ export default function HojePage() {
                 date={date}
                 area={h.areaId ? areaById.get(h.areaId) : undefined}
                 editable={editable}
-                onSet={(s) => data.setBadStatus(h, date, s)}
+                onSet={(s) => registrarMau(h, s)}
               />
             ))}
           </ul>

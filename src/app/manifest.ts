@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/config";
+import { THEME_COLORS } from "@/lib/theme-color";
 
 export const dynamic = "force-static";
 
@@ -11,8 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "pt-BR",
     start_url: "/hoje",
     display: "standalone",
-    background_color: "#14110f",
-    theme_color: "#14110f",
+    background_color: THEME_COLORS.dark,
+    theme_color: THEME_COLORS.dark,
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
