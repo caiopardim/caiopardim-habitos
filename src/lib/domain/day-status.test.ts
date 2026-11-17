@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayStatusMessage } from "./day-status";
+import { dayLevel, dayStatusMessage } from "./day-status";
 import type { DaySummary } from "./types";
 
 function s(over: Partial<DaySummary>): DaySummary {
@@ -58,5 +58,17 @@ describe("status do dia", () => {
       dayStatusMessage({ summary: s({ temItens: false }), missoesPendentes: 0, mausSemRegistro: 0 }),
     ).toBeNull();
     expect(dayStatusMessage({ summary: null, missoesPendentes: 0, mausSemRegistro: 0 })).toBeNull();
+  });
+});
+
+describe("nível do dia (faixa de datas)", () => {
+  it("classifica sem registro, baixo, bom, perfeito e descanso", () => {
+    expect(dayLevel(null, false)).toBe("vazio");
+    expect(dayLevel(s({ concluidos: 0 }), false)).toBe("vazio");
+    expect(dayLevel(s({ contaSequencia: false, execucao: 0.3, concluidos: 3 }), false)).toBe("baixo");
+    expect(dayLevel(s({ contaSequencia: true }), false)).toBe("bom");
+    expect(dayLevel(s({ execucao: 1, diaPerfeito: true, contaSequencia: true }), false)).toBe("perfeito");
+    expect(dayLevel(s({ contaSequencia: false }), true)).toBe("descanso");
+    expect(dayLevel(s({ contaSequencia: true }), true)).toBe("bom");
   });
 });

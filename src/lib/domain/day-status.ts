@@ -28,3 +28,14 @@ export function dayStatusMessage({
   }
   return "Missões concluídas";
 }
+
+export type DayLevel = "vazio" | "baixo" | "bom" | "perfeito" | "descanso";
+
+/** Classificação do dia para a faixa de datas (mini-anéis). */
+export function dayLevel(summary: DaySummary | null, descanso: boolean): DayLevel {
+  if (descanso && !summary?.contaSequencia) return "descanso";
+  if (!summary?.temItens || summary.concluidos === 0) return "vazio";
+  if (summary.diaPerfeito) return "perfeito";
+  if (summary.contaSequencia) return "bom";
+  return "baixo";
+}

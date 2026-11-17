@@ -10,10 +10,3 @@ export const formatShortDate = (date: DateStr) => format(d(date), "d 'de' MMM", 
 export const formatDayNumber = (date: DateStr) => format(d(date), "d");
 export const formatWeekdayShort = (date: DateStr) => format(d(date), "EEEEEE", { locale: ptBR });
 export const formatMonthYear = (date: DateStr) => cap(format(d(date), "MMMM 'de' yyyy", { locale: ptBR }));
-
-export function greeting(hour: number): string {
-  if (hour < 5) return "Boa noite";
-  if (hour < 12) return "Bom dia";
-  if (hour < 18) return "Boa tarde";
-  return "Boa noite";
-}

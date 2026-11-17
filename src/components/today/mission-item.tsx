@@ -32,8 +32,8 @@ function CheckButton({
       className={cn(
         "focus-visible:ring-ring/50 grid size-11 shrink-0 place-items-center rounded-full border-2 transition-colors focus-visible:ring-[3px] focus-visible:outline-none disabled:opacity-40",
         done
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-muted-foreground/40 hover:border-primary",
+          ? "border-primary/50 bg-primary/15 text-primary"
+          : "border-muted-foreground/50 hover:border-primary hover:bg-primary/5",
       )}
     >
       {done && <Check className="animate-check-pop size-5" strokeWidth={3} />}
@@ -57,7 +57,7 @@ function Meta({ area, children }: { area?: LifeArea; children: React.ReactNode }
 
 const PRIORIDADE_COR = {
   alta: "text-danger",
-  media: "text-amber-500",
+  media: "text-muted-foreground",
   baixa: "text-muted-foreground",
 } as const;
 
@@ -85,8 +85,8 @@ export function HabitMission({
   return (
     <li
       className={cn(
-        "bg-card relative rounded-xl border p-3 transition-colors",
-        done && "border-primary/40 bg-primary/5",
+        "bg-card relative rounded-xl border p-3 transition-[opacity,background-color] duration-300",
+        done && "bg-transparent opacity-60",
       )}
     >
       {node}
@@ -107,12 +107,7 @@ export function HabitMission({
           }}
         />
         <div className="min-w-0 flex-1">
-          <p
-            className={cn(
-              "truncate font-semibold",
-              done && "text-muted-foreground line-through decoration-2",
-            )}
-          >
+          <p className={cn("truncate font-semibold", done && "text-muted-foreground")}>
             <span className="mr-1.5" aria-hidden>
               {habit.emoji}
             </span>
@@ -230,8 +225,8 @@ export function TaskMission({
   return (
     <li
       className={cn(
-        "bg-card relative rounded-xl border p-3",
-        task.concluida && "border-primary/40 bg-primary/5",
+        "bg-card relative rounded-xl border p-3 transition-[opacity,background-color] duration-300",
+        task.concluida && "bg-transparent opacity-60",
       )}
     >
       {node}
@@ -251,12 +246,7 @@ export function TaskMission({
           className="min-w-0 flex-1 text-left"
           aria-label={`Editar tarefa ${task.titulo}`}
         >
-          <p
-            className={cn(
-              "truncate font-semibold",
-              task.concluida && "text-muted-foreground line-through decoration-2",
-            )}
-          >
+          <p className={cn("truncate font-semibold", task.concluida && "text-muted-foreground")}>
             {task.titulo}
           </p>
           <Meta area={area}>

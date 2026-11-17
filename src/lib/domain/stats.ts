@@ -16,6 +16,8 @@ export interface HistoryInput {
 }
 
 export interface History {
+  /** Primeiro dia do histórico (perfil, hábito, tarefa ou registro mais antigo). */
+  start: DateStr;
   summaries: Map<DateStr, DaySummary>;
   streak: StreakResult;
   xpTotal: number;
@@ -64,6 +66,7 @@ export function computeHistory(input: HistoryInput): History {
   }
 
   return {
+    start,
     summaries,
     streak: computeStreak(summaries, restDays, start, today),
     xpTotal,
