@@ -63,3 +63,33 @@ test("sugestão sem conta oferece outros canais", async ({ page }) => {
   await dialogo.getByRole("button", { name: "Enviar" }).click();
   await expect(dialogo.getByRole("status")).toContainText("Sem uma conta");
 });
+
+test("instalar sem loja: seção na página inicial e manifest completo", async ({ page, request }) => {
+  await page.goto("/#instalar");
+  await expect(page.getByRole("heading", { name: "Instale em segundos, sem loja" })).toBeVisible();
+  await expect(page.getByText("No Android")).toBeVisible();
+  await expect(page.getByText(/Adicionar à tela inicial/).first()).toBeVisible();
+
+  const m = await (await request.get("/manifest.webmanifest")).json();
+  expect(m.display).toBe("standalone");
+  expect(m.start_url).toBe("/hoje");
+  expect(m.shortcuts.map((s: { name: string }) => s.name)).toEqual(["Hoje", "Novo hábito", "Evolução"]);
+  expect(m.screenshots.some((s: { form_factor: string }) => s.form_factor === "wide")).toBe(true);
+  for (const s of m.screenshots) expect((await request.get(s.src)).status()).toBe(200);
+});
+
+test("computador: QR code para abrir no celular", async ({ browser }) => {
+  const ctx = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    isMobile: false,
+    hasTouch: false,
+    userAgent:
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36",
+  });
+  const page = await ctx.newPage();
+  await page.goto("/#instalar");
+  await expect(
+    page.getByRole("img", { name: "QR code com o endereço da Zoryka" }).locator("svg"),
+  ).toBeVisible();
+  await ctx.close();
+});

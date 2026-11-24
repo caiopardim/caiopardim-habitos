@@ -13,6 +13,7 @@ import {
   Target,
   WifiOff,
 } from "lucide-react";
+import { InstallSection } from "@/components/landing/install-section";
 import { DemoVideo } from "@/components/landing/demo-video";
 import { LandingRedirect } from "@/components/landing/landing-redirect";
 import { Button } from "@/components/ui/button";
@@ -326,6 +327,14 @@ export default function Inicio() {
             </li>
           ))}
         </ul>
+      </Secao>
+
+      <Secao
+        id="instalar"
+        titulo="Instale em segundos, sem loja"
+        subtitulo="A Zoryka é um app da web: você instala direto pelo navegador, no celular ou no computador. Sem baixar nada da loja e sem ocupar espaço."
+      >
+        <InstallSection comecar={COMECAR} />
       </Secao>
 
       {DEPOIMENTOS.length > 0 && (

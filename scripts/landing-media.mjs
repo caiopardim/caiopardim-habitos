@@ -2,7 +2,7 @@
  * Regrava os prints e o vídeo da página inicial a partir da demonstração.
  * Uso: npm run build && PORT=3100 npm run start   (em outro terminal)
  *      node scripts/landing-media.mjs
- * Gera public/landing/{hoje,evolucao,perfil}.webp, demo.mp4 e demo-poster.webp (precisa de ffmpeg).
+ * Gera public/landing/{hoje,evolucao,perfil,desktop}.webp, demo.mp4 e demo-poster.webp (precisa de ffmpeg).
  */
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readdirSync } from "node:fs";
@@ -57,6 +57,17 @@ prints.evolucao = await q.screenshot();
 await q.goto("/perfil");
 await q.waitForTimeout(1200);
 prints.perfil = await q.screenshot();
+// Print de computador (aparece na janela de instalação do Chrome/Edge)
+const d = await b.newContext({ viewport: { width: 1280, height: 800 }, baseURL: BASE });
+const dp = await d.newPage();
+await dp.goto("/demo");
+await dp.waitForURL(/hoje/);
+for (let i = 0; i < 3; i++) await dp.getByRole("checkbox", { checked: false }).first().click();
+await dp.waitForTimeout(1200);
+await dp.evaluate(() => window.scrollTo(0, 0));
+await sharp(await dp.screenshot())
+  .webp({ quality: 75 })
+  .toFile("public/landing/desktop.webp");
 await b.close();
 
 for (const [nome, png] of Object.entries(prints)) {

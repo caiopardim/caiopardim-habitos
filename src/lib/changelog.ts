@@ -16,6 +16,16 @@ export interface Novidade {
 
 const TODAS: Novidade[] = [
   {
+    id: "2026-11-24-instalar",
+    data: "2026-11-24",
+    titulo: "Instale direto do navegador",
+    itens: [
+      "Passo a passo de instalação para Android, iPhone e computador, sem passar por loja.",
+      "Atalhos ao segurar o ícone: Hoje, Novo hábito e Evolução.",
+      "No computador, um QR code leva a Zoryka para o seu celular.",
+    ],
+  },
+  {
     id: "2026-11-17-ajuda",
     data: "2026-11-17",
     titulo: "Suporte, novidades e sugestões",

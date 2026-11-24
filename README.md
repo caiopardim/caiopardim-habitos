@@ -139,6 +139,20 @@ Na **demonstração**, Configurações → "Ver o app como" mostra o app como Pr
 - **Novidades** (`/novidades`): edite `src/lib/changelog.ts` (a mais recente no topo, com `id` novo). Quem ainda
   não viu ganha o selo "Novo" em Configurações → Ajuda.
 
+### Instalação pelo navegador (sem lojas)
+
+Decisão: a Zoryka **não vai para a Play Store nem para a App Store**. Ela é instalada direto pelo navegador (PWA):
+sem taxa ou revisão das lojas, atualização na hora para todos e um só código para celular e computador.
+
+- **Android (Chrome, Edge, Samsung Internet) e computador (Chrome, Edge):** botão "Instalar a Zoryka" na página
+  inicial e em Configurações → App; a janela de instalação mostra prints do app (`screenshots` do manifest).
+- **iPhone/iPad:** Safari → Compartilhar → Adicionar à Tela de Início (o app mostra o passo a passo). Requisitos da
+  Apple: notificações só com o app **instalado** e iOS 16.4 ou mais novo.
+- **Mac:** Safari → Arquivo → Adicionar ao Dock.
+- **Atalhos** ao segurar o ícone (Android) ou clicar com o botão direito (computador): Hoje, Novo hábito e Evolução.
+- No computador, a página inicial mostra um **QR code** com o endereço aberto, para instalar no celular.
+- Para regravar os prints e o vídeo: `node scripts/landing-media.mjs` (com o app rodando na porta 3100).
+
 ### Domínio próprio
 
 1. Registre o domínio (ex.: `zoryka.com.br` no [Registro.br](https://registro.br), ou `zoryka.app`).
@@ -255,5 +269,6 @@ supabase/migrations/  schema versionado com RLS
 - [x] **Fase 4** — PWA, offline com fila de sincronização, lembretes por push, exportar CSV, excluir conta
 - [x] **Fase 5** — Planos: grátis, teste de 7 dias e Premium (Mercado Pago: Pix e cartão), paywall e Minha assinatura
 - [x] **Presença** — página inicial, SEO, suporte, novidades e sugestões
+- [x] **Distribuição** — só pelo navegador (PWA instalável), sem lojas de aplicativo
 
 > A Zoryka não substitui acompanhamento profissional de saúde.
